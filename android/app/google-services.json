@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1012169548117",
+    "project_id": "mastergig-db",
+    "storage_bucket": "mastergig-db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012169548117:android:4fe1054121a8f51f99cfdc",
+        "android_client_info": {
+          "package_name": "com.example.mastergig_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWI8g95nWmio6y5hWznRdkxLvBEZhmso0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

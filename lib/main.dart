@@ -183,7 +183,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ownerAddFormSchedulePage(),
+                    builder: (context) => const OwnerAddFormSchedulePage(),
                   ),
                 );
               },

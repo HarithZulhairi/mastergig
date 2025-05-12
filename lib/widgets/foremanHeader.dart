@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-AppBar ownerHeader(BuildContext context) {
+AppBar foremanHeader(BuildContext context) {
   return AppBar(
     title: Stack(
       children: [
@@ -52,7 +52,7 @@ AppBar ownerHeader(BuildContext context) {
       ],
     ),
     centerTitle: true,
-    backgroundColor: const Color(0xFFFFC100),
+    backgroundColor: const Color(0xDDDFDFD9),
     elevation: 0,
     toolbarHeight: 100,
     shape: const RoundedRectangleBorder(

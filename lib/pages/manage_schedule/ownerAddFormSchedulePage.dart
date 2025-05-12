@@ -1,7 +1,7 @@
 // import 'package:flutter/material.dart';
-// import 'package:mastergig/domain/Schedule/Schedule.dart';
-// import 'package:mastergig/provider/ScheduleController.dart';
-// import 'package:provider/provider.dart';
+// // import 'package:mastergig/domain/Schedule/Schedule.dart';
+// // import 'package:mastergig/provider/ScheduleController.dart';
+// // import 'package:provider/provider.dart';
 
 // class OwnerAddFormSchedulePage extends StatefulWidget {
 //   const OwnerAddFormSchedulePage({Key? key}) : super(key: key);
@@ -266,3 +266,37 @@
 //     );
 //   }
 // }
+
+import 'package:flutter/material.dart';
+import 'package:mastergig_app/main.dart';
+
+class ownerAddFormSchedulePage extends StatelessWidget {
+  const ownerAddFormSchedulePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Add Form")),
+      body: Center(
+        child: ElevatedButton(
+           onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainApp(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Different color for visibility
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Go to Schedule Management',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ), 
+            ),
+          ),
+      );
+  }
+}

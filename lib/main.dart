@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -17,7 +18,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MasterBig Workshop',
+      title: 'MasterGig Workshop',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -46,7 +47,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
 
   Future<void> _checkFirebaseConnection() async {
     try {
-      // Test Firestore connection
       await _firestore.collection('test').limit(1).get();
       setState(() {
         _isConnected = true;
@@ -94,7 +94,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Connection status indicator
+            // Existing Firebase test content...
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -113,8 +113,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               ],
             ),
             const SizedBox(height: 30),
-
-            // Test form
             const Text(
               'Firebase Test Form',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -137,8 +135,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               child: const Text('Submit to Firestore'),
             ),
             const SizedBox(height: 30),
-
-            // Display test data
             const Text(
               'Firestore Test Data',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -150,15 +146,12 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 }
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 }
-
                 if (snapshot.data!.docs.isEmpty) {
                   return const Text('No test data yet');
                 }
-
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -182,6 +175,28 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 );
               },
             ),
+            
+            // NEW: Navigation button to ownerAddFormSchedulePage
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ownerAddFormSchedulePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Different color for visibility
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Go to Schedule Management',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

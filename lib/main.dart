@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
+import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -17,6 +18,8 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MasterBig Workshop',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'MasterGig Workshop',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const FirebaseTestScreen(),
     );
@@ -89,6 +92,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
         child: Column(
           children: [
             // Connection status
+            // Existing Firebase test content...
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -109,8 +113,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               ],
             ),
             const SizedBox(height: 30),
-
-            // Test form
             const Text(
               'Firebase Test Form',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -166,15 +168,12 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 }
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 }
-
                 if (snapshot.data!.docs.isEmpty) {
                   return const Text('No test data yet');
                 }
-
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -201,6 +200,28 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 );
               },
             ),
+
+            // NEW: Navigation button to ownerAddFormSchedulePage
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OwnerAddFormSchedulePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Different color for visibility
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Go to Schedule Management',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

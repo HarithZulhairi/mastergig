@@ -49,7 +49,7 @@ class OwnerViewSchedulePage extends StatelessWidget {
                   ...schedules.map((schedule) => _buildScheduleCard(
                     context,
                     schedule,
-                  )).toList(),
+                  )),
                 
                 const SizedBox(height: 30),
                 

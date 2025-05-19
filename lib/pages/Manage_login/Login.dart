@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/provider/RegisterController.dart';
 import 'Register.dart';
 

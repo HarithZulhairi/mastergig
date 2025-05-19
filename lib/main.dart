@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MainApp());
 }
 
@@ -18,9 +17,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MasterBig Workshop',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const FirebaseTestScreen(),
     );
   }
@@ -46,7 +43,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
 
   Future<void> _checkFirebaseConnection() async {
     try {
-      // Test Firestore connection
       await _firestore.collection('test').limit(1).get();
       setState(() {
         _isConnected = true;
@@ -61,20 +57,20 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
 
   Future<void> _addTestData() async {
     if (_testController.text.isEmpty) return;
-    
+
     try {
       await _firestore.collection('test').add({
         'message': _testController.text,
         'timestamp': FieldValue.serverTimestamp(),
       });
       _testController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data added successfully!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Data added successfully!')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding data: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error adding data: $e')));
     }
   }
 
@@ -87,14 +83,12 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Firebase Connection Test'),
-      ),
+      appBar: AppBar(title: const Text('Firebase Connection Test')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Connection status indicator
+            // Connection status
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -104,7 +98,9 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _isConnected ? 'Connected to Firebase' : 'Not connected to Firebase',
+                  _isConnected
+                      ? 'Connected to Firebase'
+                      : 'Not connected to Firebase',
                   style: TextStyle(
                     color: _isConnected ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
@@ -138,14 +134,34 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
             ),
             const SizedBox(height: 30),
 
-            // Display test data
+            // Register button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text('Go to Register Page'),
+            ),
+            const SizedBox(height: 30),
+
+            // Firestore data list
             const Text(
               'Firestore Test Data',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('test').orderBy('timestamp', descending: true).snapshots(),
+              stream:
+                  _firestore
+                      .collection('test')
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
@@ -169,7 +185,10 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                       margin: const EdgeInsets.symmetric(vertical: 5),
                       child: ListTile(
                         title: Text(doc['message']),
-                        subtitle: Text(doc['timestamp']?.toDate().toString() ?? 'No timestamp'),
+                        subtitle: Text(
+                          doc['timestamp']?.toDate().toString() ??
+                              'No timestamp',
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () async {

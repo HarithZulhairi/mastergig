@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart'; 
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
+import 'package:mastergig_app/domain/Schedule/Schedule.dart';
+import 'package:mastergig_app/provider/ScheduleController.dart';
+import 'package:mastergig_app/pages/manage_schedule/ownerViewSchedulePage.dart';
 
 class OwnerAddFormSchedulePage extends StatefulWidget {
   const OwnerAddFormSchedulePage({super.key});
@@ -19,6 +24,8 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
   DateTime _selectedDate = DateTime.now();
+  final ScheduleController _scheduleController = ScheduleController();
+  bool _isSubmitting = false;
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -50,6 +57,57 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
     }
   }
 
+  Future<void> _submitForm() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() => _isSubmitting = true);
+
+  try {
+    final schedule = Schedule(
+      workshopName: _workshopNameController.text.trim(),
+      workshopAddress: _addressController.text.trim(),
+      foremanRequired: _foremanController.text.trim(),
+      payrollPerHour: double.parse(_payrollController.text.trim()),
+      workDate: _selectedDate,
+      startTime: _startTime,
+      endTime: _endTime,
+    );
+
+    // Add debug print before saving
+    print('Attempting to save schedule: ${schedule.toMap()}');
+
+    final docId = await _scheduleController.addSchedule(schedule);
+    
+    // Add debug print after saving
+    print('Schedule saved with ID: $docId');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Schedule added successfully!')),
+    );
+
+    _formKey.currentState!.reset();
+    setState(() {
+      _startTime = TimeOfDay.now();
+      _endTime = TimeOfDay.now();
+      _selectedDate = DateTime.now();
+    });
+  } on FirebaseException catch (e) {
+    // Specific Firebase error handling
+    print('Firebase error: ${e.code} - ${e.message}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Firebase error: ${e.message}')),
+    );
+  } catch (e) {
+    // General error handling
+    print('General error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    setState(() => _isSubmitting = false);
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,18 +116,16 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Centered heading outside the container
             const Text(
               'Add Working Schedule',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             
-            // Form container
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -114,7 +170,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                     ),
                     const SizedBox(height: 15),
                     
-                    // Time Row
+                    // Working Time
                     const Text(
                       'Working Time',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -179,7 +235,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                           contentPadding: const EdgeInsets.all(12),
                         ),
                         child: Text(
-                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                          '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
@@ -270,31 +326,28 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Schedule added successfully!')),
-                            );
-                          }
-                        },
+                        onPressed: _isSubmitting ? null : _submitForm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFF18E),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(  // NEW: Black border around AppBar
+                            side: const BorderSide(
                               color: Colors.black,
                               width: 0.5,
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Submit',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          ),
-                        ),
+                        child: _isSubmitting
+                            ? const CircularProgressIndicator()
+                            : const Text(
+                                'Submit',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -302,15 +355,15 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
               ),
             ),
             
-            // Add the two buttons beneath the form
+            // Bottom buttons
             const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: Opacity(
-                    opacity: 0.5, // Make the button semi-transparent
+                    opacity: 0.5,
                     child: ElevatedButton(
-                      onPressed: null, // Disable the button
+                      onPressed: null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF9BE08),
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -326,6 +379,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                         'Add Schedule',
                         style: TextStyle(
                           color: Colors.black,
+                          fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
@@ -336,7 +390,13 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Add navigation to view schedule list
+                      // Navigation to view schedule list can be added here
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OwnerViewSchedulePage(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xEEEFD30B),
@@ -354,6 +414,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

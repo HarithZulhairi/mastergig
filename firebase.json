@@ -1,1 +1,33 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"mastergig-db","appId":"1:1012169548117:android:4fe1054121a8f51f99cfdc","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"mastergig-db","configurations":{"android":"1:1012169548117:android:4fe1054121a8f51f99cfdc","ios":"1:1012169548117:ios:bb2a47ab4e62abf599cfdc","macos":"1:1012169548117:ios:bb2a47ab4e62abf599cfdc","web":"1:1012169548117:web:6be4f7c4cfb7ee9599cfdc","windows":"1:1012169548117:web:b0edd8058fcbc70999cfdc"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "mastergig-db",
+          "appId": "1:1012169548117:android:4fe1054121a8f51f99cfdc",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "mastergig-db",
+          "configurations": {
+            "android": "1:1012169548117:android:4fe1054121a8f51f99cfdc",
+            "ios": "1:1012169548117:ios:bb2a47ab4e62abf599cfdc",
+            "macos": "1:1012169548117:ios:bb2a47ab4e62abf599cfdc",
+            "web": "1:1012169548117:web:6be4f7c4cfb7ee9599cfdc",
+            "windows": "1:1012169548117:web:b0edd8058fcbc70999cfdc"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
+  },
+  "dataconnect": {
+    "source": "dataconnect"
+  }
+}

@@ -1,4 +1,4 @@
-class UserModel {
+class userModel {
   final String phone;
   final String username;
   final String password;
@@ -6,7 +6,7 @@ class UserModel {
   final String licenseNumber;
   final String role;
 
-  UserModel({
+  userModel({
     required this.phone,
     required this.username,
     required this.password,

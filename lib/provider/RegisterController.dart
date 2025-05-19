@@ -1,7 +1,13 @@
-import 'package:mastergig_app/domain/LoginAndProfile/userModel.dart';
+import 'package:flutter/material.dart';
+import 'package:mastergig_app/LoginAndProfile/userModel.dart';
 
 class RegisterController {
-  final UserModel _userModel = UserModel();
+  // Singleton setup
+  static final RegisterController _instance = RegisterController._internal();
+  factory RegisterController() => _instance;
+  RegisterController._internal();
+
+  final List<userModel> _registeredUsers = [];
 
   Future<String?> signUp({
     required String phone,
@@ -11,18 +17,29 @@ class RegisterController {
     required String licenseNumber,
     required String role,
   }) async {
-    try {
-      await _userModel.registerUser(
-        username: username,
-        password: password,
-        phone: phone,
-        role: role,
-        staffNumber: staffNumber,
-        licenseNumber: licenseNumber,
-      );
-      return null;
-    } catch (e) {
-      return e.toString(); // Already returns error to view
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (_registeredUsers.any((user) => user.username == username)) {
+      return "Username already exists";
     }
+
+    if (phone.isEmpty || username.isEmpty || password.isEmpty) {
+      return "Please fill in all required fields";
+    }
+
+    final newUser = userModel(
+      phone: phone,
+      username: username,
+      password: password,
+      staffNumber: staffNumber,
+      licenseNumber: licenseNumber,
+      role: role,
+    );
+
+    _registeredUsers.add(newUser);
+    debugPrint("New user registered: ${newUser.toJson()}");
+    return null;
   }
+
+  List<userModel> get allUsers => _registeredUsers;
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mastergig_app/LoginAndProfile/userModel.dart';
+import 'package:mastergig_app/pages/Manage_login/UserListScreen.dart';
 import 'package:mastergig_app/provider/RegisterController.dart';
 
 class Register extends StatefulWidget {
@@ -11,13 +13,13 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
+  final RegisterController _registerController = RegisterController();
+
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController staffNumberController = TextEditingController();
   final TextEditingController licenseNumberController = TextEditingController();
-
-  final RegisterController _registerController = RegisterController();
 
   String selectedRole = 'Owner';
   bool agreeToTerms = false;
@@ -44,12 +46,26 @@ class _RegisterState extends State<Register> {
           const SnackBar(content: Text("User successfully registered")),
         );
         _formKey.currentState?.reset();
+        setState(() {
+          agreeToTerms = false;
+          selectedRole = 'Owner';
+        });
       } else {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
       }
     }
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    staffNumberController.dispose();
+    licenseNumberController.dispose();
+    super.dispose();
   }
 
   @override
@@ -113,6 +129,22 @@ class _RegisterState extends State<Register> {
                                           ? "Username is required"
                                           : null,
                             ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => UserListScreen(
+                                          registerController:
+                                              _registerController,
+                                        ),
+                                  ),
+                                );
+                              },
+                              child: const Text("View Registered Users"),
+                            ),
+
                             const SizedBox(height: 15),
                             TextFormField(
                               controller: passwordController,

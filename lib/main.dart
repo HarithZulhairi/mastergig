@@ -17,8 +17,6 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MasterBig Workshop',
-      theme: ThemeData(primarySwatch: Colors.blue),
       title: 'MasterGig Workshop',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const FirebaseTestScreen(),

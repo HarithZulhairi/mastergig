@@ -18,7 +18,6 @@ class RegisterController {
     required String role,
   }) async {
     try {
-      // Check if username already exists
       final query =
           await _firestore
               .collection('users')
@@ -40,11 +39,44 @@ class RegisterController {
 
       await _firestore.collection('users').add(newUser.toJson());
       debugPrint("New user added to Firestore: ${newUser.toJson()}");
-
       return null;
     } catch (e) {
       debugPrint("Error adding user to Firestore: $e");
       return "Failed to register user";
+    }
+  }
+
+  Future<String?> signIn({
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    try {
+      final query =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (query.docs.isEmpty) {
+        return "User not found";
+      }
+
+      final userData = query.docs.first.data();
+
+      if (userData['password'] != password) {
+        return "Incorrect password";
+      }
+
+      if (userData['role']?.toLowerCase() != role.toLowerCase()) {
+        return "You are not registered as $role";
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint("Error during login: $e");
+      return "Login failed. Please try again.";
     }
   }
 

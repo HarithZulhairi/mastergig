@@ -28,7 +28,7 @@ class _Login extends State<Login> {
     final password = passwordController.text;
 
     final result = await _controller.signUp(
-      username: email.split('@').first,
+      email: email.split('@').first,
       password: password,
       phone: '0000000000',
       staffNumber: '12345',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/pages/Manage_login/UserListScreen.dart';
-import 'package:mastergig_app/provider/RegisterController.dart';
+import 'package:mastergig_app/pages/Manage_login/UserListScreen.dart'
+    as user_list;
+import 'package:mastergig_app/provider/RegisterController.dart' as provider;
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -12,19 +13,20 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
-  final RegisterController _registerController = RegisterController();
-
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController staffNumberController = TextEditingController();
   final TextEditingController licenseNumberController = TextEditingController();
+
+  final provider.RegisterController _registerController =
+      provider.RegisterController();
 
   String selectedRole = 'Owner';
   bool agreeToTerms = false;
 
   Future<void> _signUp() async {
-    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final phone = phoneController.text.trim();
     final staffNumber = staffNumberController.text.trim();
@@ -32,7 +34,7 @@ class _RegisterState extends State<Register> {
 
     final errorMessage = await _registerController.signUp(
       phone: phone,
-      username: username,
+      email: email, // assuming backend still uses "username"
       password: password,
       staffNumber: staffNumber,
       licenseNumber: licenseNumber,
@@ -45,10 +47,12 @@ class _RegisterState extends State<Register> {
           const SnackBar(content: Text("User successfully registered")),
         );
         _formKey.currentState?.reset();
-        setState(() {
-          agreeToTerms = false;
-          selectedRole = 'Owner';
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const user_list.UserListScreen(),
+          ),
+        );
       } else {
         ScaffoldMessenger.of(
           context,
@@ -57,14 +61,11 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  @override
-  void dispose() {
-    phoneController.dispose();
-    usernameController.dispose();
-    passwordController.dispose();
-    staffNumberController.dispose();
-    licenseNumberController.dispose();
-    super.dispose();
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) return 'Email is required';
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) return 'Enter a valid email';
+    return null;
   }
 
   @override
@@ -109,41 +110,20 @@ class _RegisterState extends State<Register> {
                                 border: OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.phone,
-                              validator:
-                                  (value) =>
-                                      value == null || value.isEmpty
-                                          ? "Phone number is required"
-                                          : null,
+                              validator: (value) => value == null || value.isEmpty
+                                  ? "Phone number is required"
+                                  : null,
                             ),
                             const SizedBox(height: 15),
                             TextFormField(
-                              controller: usernameController,
+                              controller: emailController,
                               decoration: const InputDecoration(
-                                labelText: "Username",
+                                labelText: "Email",
                                 border: OutlineInputBorder(),
                               ),
-                              validator:
-                                  (value) =>
-                                      value == null || value.isEmpty
-                                          ? "Username is required"
-                                          : null,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: _validateEmail,
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => UserListScreen(
-                                          registerController:
-                                              _registerController,
-                                        ),
-                                  ),
-                                );
-                              },
-                              child: const Text("View Registered Users"),
-                            ),
-
                             const SizedBox(height: 15),
                             TextFormField(
                               controller: passwordController,
@@ -152,11 +132,9 @@ class _RegisterState extends State<Register> {
                                 labelText: "Password",
                                 border: OutlineInputBorder(),
                               ),
-                              validator:
-                                  (value) =>
-                                      value == null || value.length < 6
-                                          ? "Password must be at least 6 characters"
-                                          : null,
+                              validator: (value) => value == null || value.length < 6
+                                  ? "Password must be at least 6 characters"
+                                  : null,
                             ),
                             const SizedBox(height: 15),
                             DropdownButtonFormField<String>(

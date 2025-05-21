@@ -39,7 +39,7 @@ class _OwnerEditSchedulePageState extends State<OwnerEditSchedulePage> {
     // Initialize controllers with existing schedule data
     _workshopNameController = TextEditingController(text: widget.schedule.workshopName);
     _addressController = TextEditingController(text: widget.schedule.workshopAddress);
-    _foremanController = TextEditingController(text: widget.schedule.foremanRequired);
+    _foremanController = TextEditingController(text: widget.schedule.foremanRequired.toString());
     _payrollController = TextEditingController(text: widget.schedule.payrollPerHour.toString());
     
     _startTime = widget.schedule.startTime;
@@ -87,7 +87,7 @@ class _OwnerEditSchedulePageState extends State<OwnerEditSchedulePage> {
         id: widget.scheduleId,
         workshopName: _workshopNameController.text.trim(),
         workshopAddress: _addressController.text.trim(),
-        foremanRequired: _foremanController.text.trim(),
+        foremanRequired: int.parse(_foremanController.text.trim()),
         payrollPerHour: double.parse(_payrollController.text.trim()),
         workDate: _selectedDate,
         startTime: _startTime,
@@ -287,6 +287,7 @@ class _OwnerEditSchedulePageState extends State<OwnerEditSchedulePage> {
                     const SizedBox(height: 5),
                     TextFormField(
                       controller: _foremanController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: 'Enter Foreman Required',
                         border: OutlineInputBorder(

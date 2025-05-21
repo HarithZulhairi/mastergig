@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart'; 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/domain/Schedule/Schedule.dart';
@@ -58,55 +57,79 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
   }
 
   Future<void> _submitForm() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _isSubmitting = true);
+    setState(() => _isSubmitting = true);
 
-  try {
-    final schedule = Schedule(
-      workshopName: _workshopNameController.text.trim(),
-      workshopAddress: _addressController.text.trim(),
-      foremanRequired: _foremanController.text.trim(),
-      payrollPerHour: double.parse(_payrollController.text.trim()),
-      workDate: _selectedDate,
-      startTime: _startTime,
-      endTime: _endTime,
-    );
+    try {
+      final schedule = Schedule(
+        workshopName: _workshopNameController.text.trim(),
+        workshopAddress: _addressController.text.trim(),
+        foremanRequired: int.parse(_foremanController.text.trim()),
+        payrollPerHour: double.parse(_payrollController.text.trim()),
+        workDate: _selectedDate,
+        startTime: _startTime,
+        endTime: _endTime,
+      );
 
-    // Add debug print before saving
-    print('Attempting to save schedule: ${schedule.toMap()}');
+      final docId = await _scheduleController.addSchedule(schedule);
+      
+      // Show success dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          Future.delayed(const Duration(milliseconds: 1000), () {
+            Navigator.of(context).pop();
+            // Navigate to view page after dialog closes
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const OwnerViewSchedulePage(),
+              ),
+            );
+          });
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            title: const Center(child: 
+              Text(
+                'Success!',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
+                ),
+              )
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 100),
+              ],
+            ),
+          );
+        },
+      );
 
-    final docId = await _scheduleController.addSchedule(schedule);
-    
-    // Add debug print after saving
-    print('Schedule saved with ID: $docId');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Schedule added successfully!')),
-    );
-
-    _formKey.currentState!.reset();
-    setState(() {
-      _startTime = TimeOfDay.now();
-      _endTime = TimeOfDay.now();
-      _selectedDate = DateTime.now();
-    });
-  } on FirebaseException catch (e) {
-    // Specific Firebase error handling
-    print('Firebase error: ${e.code} - ${e.message}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Firebase error: ${e.message}')),
-    );
-  } catch (e) {
-    // General error handling
-    print('General error: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
-  } finally {
-    setState(() => _isSubmitting = false);
+      _formKey.currentState!.reset();
+      setState(() {
+        _startTime = TimeOfDay.now();
+        _endTime = TimeOfDay.now();
+        _selectedDate = DateTime.now();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isSubmitting = false);
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -275,8 +298,10 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                     const SizedBox(height: 5),
                     TextFormField(
                       controller: _foremanController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        hintText: 'Enter Foreman Required',
+                        hintText: 'Enter number of foremen required',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -285,7 +310,13 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please select a foreman';
+                          return 'Please enter number of foremen';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid whole number';
+                        }
+                        if (int.parse(value) <= 0) {
+                          return 'Please enter a number greater than 0';
                         }
                         return null;
                       },
@@ -390,7 +421,6 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigation to view schedule list can be added here
                       Navigator.push(
                         context,
                         MaterialPageRoute(

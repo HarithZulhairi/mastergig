@@ -3,11 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
+import 'package:mastergig_app/pages/manage_schedule/foremanSelectSchedulePage.dart';
 import 'firebase_options.dart';
+import 'package:mastergig_app/provider/ScheduleController.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  ScheduleController().startScheduleCleanupTask();
   runApp(const MainApp());
 }
 
@@ -216,6 +219,25 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               ),
               child: const Text(
                 'Go to Schedule Management',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ForemanSelectSchedulePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Different color for visibility
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Go to Select Foreman',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:mastergig_app/pages/manage_schedule/foremanViewSchedulePage.dart';
 
 int _currentIndex = 0; // Track current tab index
 
-BottomNavigationBar ownerFooter(BuildContext context) {
+BottomNavigationBar foremanFooter(BuildContext context) {
   return BottomNavigationBar(
     currentIndex: _currentIndex,
     onTap: (int index) {
       // Handle tab changes
       _currentIndex = index;
-      // You can add navigation logic here
+      if (index == 1) { // Assuming calendar is at index 2
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>  ForemanViewSchedulePage()),
+      );
+    }
     },
     backgroundColor: const Color(0xBBBCBCBC), // Yellow background
     selectedItemColor: Colors.black, // Selected icon color
@@ -36,7 +42,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
           padding: const EdgeInsets.all(0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: _currentIndex == 2 
+            color: _currentIndex == 1 
                 ? Colors.black.withOpacity(0.1) 
                 : Colors.transparent,
           ),
@@ -44,7 +50,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
         ),
         label: '',
       ),
-            BottomNavigationBarItem(
+      BottomNavigationBarItem(
         icon: Container(
           padding: const EdgeInsets.all(0),
           decoration: BoxDecoration(

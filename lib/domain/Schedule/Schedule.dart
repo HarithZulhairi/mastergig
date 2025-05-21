@@ -5,11 +5,14 @@ class Schedule {
   String? id;
   final String workshopName;
   final String workshopAddress;
-  final String foremanRequired;
+  final int foremanRequired;
   final double payrollPerHour;
   final DateTime workDate;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
+  final String scheduleStatus; // New field
+  final String? acceptedBy;    // New field - foreman ID who accepted
+  final Timestamp? acceptedAt; // New field - when it was accepted
 
   Schedule({
     this.id,
@@ -20,6 +23,9 @@ class Schedule {
     required this.workDate,
     required this.startTime,
     required this.endTime,
+    this.scheduleStatus = 'available', // Default status
+    this.acceptedBy,
+    this.acceptedAt,
   });
 
   // Convert to Map for Firebase
@@ -32,6 +38,9 @@ class Schedule {
       'workDate': workDate.millisecondsSinceEpoch,
       'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
       'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
+      'scheduleStatus': scheduleStatus, // New field
+      'acceptedBy': acceptedBy,         // New field
+      'acceptedAt': acceptedAt,         // New field
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
@@ -53,6 +62,9 @@ class Schedule {
         hour: (map['endTime']?['hour'] ?? 0),
         minute: (map['endTime']?['minute'] ?? 0),
       ),
+      scheduleStatus: map['scheduleStatus'] ?? 'available', // New field
+      acceptedBy: map['acceptedBy'],                       // New field
+      acceptedAt: map['acceptedAt'],                       // New field
     );
   }
 
@@ -100,5 +112,30 @@ class Schedule {
     );
   }
 
+  // Helper to check if schedule is available
+  bool get isAvailable => scheduleStatus == 'available';
 
+  // Helper to check if schedule is accepted
+  bool get isAccepted => scheduleStatus == 'accepted';
+
+  // Copy with method for updating status
+  Schedule copyWith({
+    String? scheduleStatus,
+    String? acceptedBy,
+    Timestamp? acceptedAt,
+  }) {
+    return Schedule(
+      id: id,
+      workshopName: workshopName,
+      workshopAddress: workshopAddress,
+      foremanRequired: foremanRequired,
+      payrollPerHour: payrollPerHour,
+      workDate: workDate,
+      startTime: startTime,
+      endTime: endTime,
+      scheduleStatus: scheduleStatus ?? this.scheduleStatus,
+      acceptedBy: acceptedBy ?? this.acceptedBy,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+    );
+  }
 }

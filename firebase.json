@@ -29,5 +29,10 @@
   },
   "dataconnect": {
     "source": "dataconnect"
+  },
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

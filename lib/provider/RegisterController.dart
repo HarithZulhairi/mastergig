@@ -10,6 +10,7 @@ class RegisterController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<String?> signUp({
+    required String name,
     required String phone,
     required String email,
     required String password,
@@ -29,6 +30,7 @@ class RegisterController {
       }
 
       final newUser = userModel(
+        name: name,
         phone: phone,
         username: email,
         password: password,
@@ -80,13 +82,53 @@ class RegisterController {
     }
   }
 
+  Future<String?> updateUserProfile({
+    required String username,
+    required String phone,
+    required String staffNumber,
+    required String licenseNumber,
+  }) async {
+    // Basic validation examples
+    if (username.isEmpty || phone.isEmpty) {
+      return 'Username and phone cannot be empty';
+    }
+
+    try {
+      // Find the user document by username
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('username', isEqualTo: username)
+              .limit(1)
+              .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return 'User not found';
+      }
+
+      final docId = querySnapshot.docs.first.id;
+
+      // Update fields
+      await FirebaseFirestore.instance.collection('users').doc(docId).update({
+        'phone': phone,
+        'staffNumber': staffNumber,
+        'licenseNumber': licenseNumber,
+      });
+
+      return null; // success
+    } catch (e) {
+      return 'Failed to update profile: $e';
+    }
+  }
+
   Future<List<userModel>> getAllUsers() async {
     final snapshot = await _firestore.collection('users').get();
     return snapshot.docs.map((doc) {
       final data = doc.data();
       return userModel(
+        name: data['name'],
+        username: data['email'],
         phone: data['phone'],
-        username: data['username'],
         password: data['password'],
         staffNumber: data['staffNumber'],
         licenseNumber: data['licenseNumber'],

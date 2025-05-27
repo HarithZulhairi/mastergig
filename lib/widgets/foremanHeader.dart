@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mastergig_app/pages/Manage_login/ForemanProfile.dart';
+import 'package:mastergig_app/pages/Manage_profile/ForemanProfile.dart';
+import 'package:mastergig_app/pages/Manage_login/Login.dart'; // Assuming you have a login page here
 
 AppBar foremanHeader(BuildContext context) {
   return AppBar(
@@ -64,25 +65,38 @@ AppBar foremanHeader(BuildContext context) {
       child: IconButton(
         icon: const Icon(Icons.notifications, color: Colors.black, size: 50),
         onPressed: () {
-          // Notifications
+          // Handle notifications
         },
       ),
     ),
     actions: [
       Padding(
         padding: const EdgeInsets.only(right: 10.0),
-        child: IconButton(
+        child: PopupMenuButton<String>(
           icon: const Icon(Icons.account_circle, color: Colors.black, size: 50),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) =>
-                        ForemanProfile(foremanEmail: 'melow@gmail.com'),
-              ),
-            );
+          onSelected: (String value) {
+            if (value == 'Profile') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          ForemanProfile(foremanEmail: 'melow@gmail.com'),
+                ),
+              );
+            } else if (value == 'Logout') {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+                (route) => false,
+              );
+            }
           },
+          itemBuilder:
+              (BuildContext context) => [
+                const PopupMenuItem(value: 'Profile', child: Text('Profile')),
+                const PopupMenuItem(value: 'Logout', child: Text('Logout')),
+              ],
         ),
       ),
     ],

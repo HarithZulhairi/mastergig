@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/pages/Manage_login/UserListScreen.dart'
-    as user_list;
+import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/provider/RegisterController.dart' as provider;
 
 class Register extends StatefulWidget {
@@ -18,6 +17,7 @@ class _RegisterState extends State<Register> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController staffNumberController = TextEditingController();
   final TextEditingController licenseNumberController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
 
   final provider.RegisterController _registerController =
       provider.RegisterController();
@@ -31,10 +31,12 @@ class _RegisterState extends State<Register> {
     final phone = phoneController.text.trim();
     final staffNumber = staffNumberController.text.trim();
     final licenseNumber = licenseNumberController.text.trim();
+    final name = nameController.text.trim();
 
     final errorMessage = await _registerController.signUp(
+      name: name,
       phone: phone,
-      email: email, // assuming backend still uses "username"
+      email: email,
       password: password,
       staffNumber: staffNumber,
       licenseNumber: licenseNumber,
@@ -43,16 +45,41 @@ class _RegisterState extends State<Register> {
 
     if (context.mounted) {
       if (errorMessage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User successfully registered")),
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+              );
+            });
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              ),
+              title: const Center(
+                child: Text(
+                  'Sign Up Sucessfull!',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 32,
+                  ),
+                ),
+              ),
+              content: const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 100,
+              ),
+            );
+          },
         );
+
         _formKey.currentState?.reset();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const user_list.UserListScreen(),
-          ),
-        );
       } else {
         ScaffoldMessenger.of(
           context,
@@ -101,6 +128,19 @@ class _RegisterState extends State<Register> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            TextFormField(
+                              controller: nameController,
+                              decoration: const InputDecoration(
+                                labelText: "Full Name",
+                                border: OutlineInputBorder(),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? "Full name is required"
+                                          : null,
+                            ),
+                            const SizedBox(height: 15),
                             const Text("Contact Information"),
                             const SizedBox(height: 10),
                             TextFormField(
@@ -110,9 +150,11 @@ class _RegisterState extends State<Register> {
                                 border: OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.phone,
-                              validator: (value) => value == null || value.isEmpty
-                                  ? "Phone number is required"
-                                  : null,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? "Phone number is required"
+                                          : null,
                             ),
                             const SizedBox(height: 15),
                             TextFormField(
@@ -132,9 +174,11 @@ class _RegisterState extends State<Register> {
                                 labelText: "Password",
                                 border: OutlineInputBorder(),
                               ),
-                              validator: (value) => value == null || value.length < 6
-                                  ? "Password must be at least 6 characters"
-                                  : null,
+                              validator:
+                                  (value) =>
+                                      value == null || value.length < 6
+                                          ? "Password must be at least 6 characters"
+                                          : null,
                             ),
                             const SizedBox(height: 15),
                             DropdownButtonFormField<String>(
@@ -160,22 +204,35 @@ class _RegisterState extends State<Register> {
                               ),
                             ),
                             const SizedBox(height: 15),
-                            TextFormField(
-                              controller: staffNumberController,
-                              decoration: const InputDecoration(
-                                labelText: "Staff Number",
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
+
+                            // ✅ Conditional Field
+                            selectedRole == "Owner"
+                                ? TextFormField(
+                                  controller: licenseNumberController,
+                                  decoration: const InputDecoration(
+                                    labelText: "License Number",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator:
+                                      (value) =>
+                                          value == null || value.isEmpty
+                                              ? "License number is required"
+                                              : null,
+                                )
+                                : TextFormField(
+                                  controller: staffNumberController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Staff Number",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator:
+                                      (value) =>
+                                          value == null || value.isEmpty
+                                              ? "Staff number is required"
+                                              : null,
+                                ),
                             const SizedBox(height: 15),
-                            TextFormField(
-                              controller: licenseNumberController,
-                              decoration: const InputDecoration(
-                                labelText: "License Number",
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                            const SizedBox(height: 15),
+
                             Row(
                               children: [
                                 Checkbox(

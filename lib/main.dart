@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
 import 'package:mastergig_app/pages/manage_schedule/foremanSelectSchedulePage.dart';
+import 'package:mastergig_app/pages/manage_inventory/inventoryAddFormPage.dart'; // <--- NEW IMPORT
 import 'firebase_options.dart';
 import 'package:mastergig_app/provider/ScheduleController.dart';
 
@@ -23,6 +24,7 @@ class MainApp extends StatelessWidget {
       title: 'MasterGig Workshop',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const FirebaseTestScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -92,8 +94,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Connection status
-            // Existing Firebase test content...
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -136,8 +136,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               child: const Text('Submit to Firestore'),
             ),
             const SizedBox(height: 30),
-
-            // Register button
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -152,19 +150,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               child: const Text('Go to Register Page'),
             ),
             const SizedBox(height: 30),
-
-            // Firestore data list
             const Text(
               'Firestore Test Data',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             StreamBuilder<QuerySnapshot>(
-              stream:
-                  _firestore
-                      .collection('test')
-                      .orderBy('timestamp', descending: true)
-                      .snapshots(),
+              stream: _firestore
+                  .collection('test')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
@@ -186,8 +181,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                       child: ListTile(
                         title: Text(doc['message']),
                         subtitle: Text(
-                          doc['timestamp']?.toDate().toString() ??
-                              'No timestamp',
+                          doc['timestamp']?.toDate().toString() ?? 'No timestamp',
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
@@ -201,8 +195,6 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 );
               },
             ),
-
-            // NEW: Navigation button to ownerAddFormSchedulePage
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
@@ -214,7 +206,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // Different color for visibility
+                backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 50),
               ),
               child: const Text(
@@ -222,7 +214,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -233,7 +225,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // Different color for visibility
+                backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 50),
               ),
               child: const Text(
@@ -242,6 +234,25 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            // 🔹 NEW: Go to Add Inventory Form
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InventoryAddFormPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Go to Add Inventory Form',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),

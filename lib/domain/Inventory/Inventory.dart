@@ -1,25 +1,25 @@
 class Inventory {
   final String id;
   final String name;
-  final int quantity;
-  final double unitPrice;
   final String supplier;
-  final String shopName;
   final String notes;
   final String category;
+  final int quantity;
+  final double unitPrice;
+  final String shopName;
   final DateTime createdAt;
 
   Inventory({
     this.id = '',
     required this.name,
-    required this.quantity,
-    required this.unitPrice,
     required this.supplier,
-    required this.shopName,
     required this.notes,
     required this.category,
-    required this.createdAt,
-  });
+    required this.quantity,
+    required this.unitPrice,
+    this.shopName = '',
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
     return {
@@ -44,7 +44,7 @@ class Inventory {
       shopName: map['shopName'] ?? '',
       notes: map['notes'] ?? '',
       category: map['category'] ?? '',
-      createdAt: DateTime.parse(map['createdAt']),
+      createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 }

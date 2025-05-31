@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/widgets/ownerFooter.dart';
-import 'package:mastergig_app/widgets/ownerHeader.dart';
-import 'package:mastergig_app/pages/manage_inventory/inventoryAddFormPage.dart';
-import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
-// import 'inventoryMyListPage.dart'; // Uncomment if "My List" page is implemented
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InventoryRequestPage extends StatefulWidget {
   const InventoryRequestPage({super.key});
@@ -14,143 +10,73 @@ class InventoryRequestPage extends StatefulWidget {
 
 class _InventoryRequestPageState extends State<InventoryRequestPage> {
   String _selectedView = 'Requested to Me';
-
-  final List<Map<String, String>> requestedToMe = [
-    {
-      'item': 'Michelin Pilot Sport 4',
-      'from': 'Kita Workshop',
-      'quantity': '5',
-    },
-    {
-      'item': 'Amaron Hi-Life 55B24L',
-      'from': 'Lima Workshop',
-      'quantity': '2',
-    },
-  ];
-
-  final List<Map<String, String>> myRequests = [
-    {
-      'item': 'Michelin Pilot Sport 4',
-      'to': 'Rizal Workshop',
-      'quantity': '3',
-      'status': 'Pending',
-    },
-    {
-      'item': 'Amaron Hi-Life 55B24L',
-      'to': 'Kita Workshop',
-      'quantity': '2',
-      'status': 'Accepted',
-    },
-  ];
-
-  void _handleAccept(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Accepted request for ${requestedToMe[index]['item']}")),
-    );
-  }
-
-  void _handleCancel(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Cancelled request for ${requestedToMe[index]['item']}")),
-    );
-  }
+  String _workshopName = '';
 
   @override
   Widget build(BuildContext context) {
-    final isRequestedToMe = _selectedView == 'Requested to Me';
-
     return Scaffold(
-      appBar: ownerHeader(context),
-      bottomNavigationBar: ownerFooter(context), // Only this footer is kept
-      body: Column(
-        children: [
-          const SizedBox(height: 16),
-          Center(
-            child: DropdownButton<String>(
-              value: _selectedView,
-              onChanged: (value) {
-                setState(() {
-                  _selectedView = value!;
-                });
-              },
-              items: ['Requested to Me', 'My Request']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
+      appBar: AppBar(title: const Text('Inventory Requests')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              decoration: const InputDecoration(labelText: 'Your Workshop Name'),
+              onChanged: (val) => _workshopName = val.trim(),
             ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: isRequestedToMe
-                ? ListView.builder(
-                    itemCount: requestedToMe.length,
+            const SizedBox(height: 10),
+            DropdownButton<String>(
+              value: _selectedView,
+              onChanged: (val) => setState(() => _selectedView = val!),
+              items: const [
+                DropdownMenuItem(value: 'Requested to Me', child: Text('Requested to Me')),
+                DropdownMenuItem(value: 'My Request', child: Text('My Request')),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('inventory_requests')
+                    .where(_selectedView == 'Requested to Me' ? 'toWorkshop' : 'fromWorkshop', isEqualTo: _workshopName)
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const CircularProgressIndicator();
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) return const Text('No requests found.');
+                  return ListView.builder(
+                    itemCount: docs.length,
                     itemBuilder: (context, index) {
-                      final item = requestedToMe[index];
+                      final r = docs[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item['item']!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              Text('Requested by: ${item['from']}'),
-                              Text('Quantity: ${item['quantity']} Units'),
-                              const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                    onPressed: () => _handleAccept(index),
-                                    style: TextButton.styleFrom(backgroundColor: Colors.green[400]),
-                                    child: const Text('Accept', style: TextStyle(color: Colors.white)),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  TextButton(
-                                    onPressed: () => _handleCancel(index),
-                                    style: TextButton.styleFrom(backgroundColor: Colors.red[400]),
-                                    child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
+                        child: ListTile(
+                          title: Text('${r['itemName']} (${r['quantity']} units)'),
+                          subtitle: Text('From: ${r['fromWorkshop']} | To: ${r['toWorkshop']}'),
+                          trailing: _selectedView == 'Requested to Me'
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () => r.reference.update({'status': 'Accepted'}),
+                                      child: const Text('Accept'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => r.reference.update({'status': 'Cancelled'}),
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                )
+                              : Text('Status: ${r['status']}'),
                         ),
                       );
                     },
-                  )
-                : ListView.builder(
-                    itemCount: myRequests.length,
-                    itemBuilder: (context, index) {
-                      final item = myRequests[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item['item']!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              Text('To: ${item['to']}'),
-                              Text('Quantity: ${item['quantity']} Units'),
-                              Text(
-                                'Status: ${item['status']}',
-                                style: TextStyle(
-                                  color: item['status'] == 'Accepted'
-                                      ? Colors.green
-                                      : Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

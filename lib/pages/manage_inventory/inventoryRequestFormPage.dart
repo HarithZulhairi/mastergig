@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mastergig_app/widgets/ownerHeader.dart';
+import 'package:mastergig_app/widgets/ownerFooter.dart';
 
 class InventoryRequestFormPage extends StatefulWidget {
   final DocumentSnapshot item;
@@ -10,16 +12,16 @@ class InventoryRequestFormPage extends StatefulWidget {
 }
 
 class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
-  String quantity = '';
-  String myWorkshopName = '';
+  final TextEditingController myWorkshopNameController = TextEditingController();
+  String? selectedQuantity;
 
   Future<void> sendRequest() async {
     await FirebaseFirestore.instance.collection('inventory_requests').add({
       'itemId': widget.item.id,
       'itemName': widget.item['inventoryName'],
       'toWorkshop': widget.item['workshopName'],
-      'fromWorkshop': myWorkshopName,
-      'quantity': int.tryParse(quantity) ?? 1,
+      'fromWorkshop': myWorkshopNameController.text,
+      'quantity': int.parse(selectedQuantity ?? '1'),
       'status': 'Pending',
       'timestamp': Timestamp.now(),
     });
@@ -27,37 +29,100 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
+    final data = widget.item.data() as Map<String, dynamic>;
+    final int maxQty = (data['quantity'] ?? 0) as int;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Request Inventory')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      appBar: ownerHeader(context),
+      bottomNavigationBar: ownerFooter(context),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Inventory: ${item['inventoryName']}'),
-            Text('Available: ${item['quantity']}'),
-            const Divider(),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Quantity to Request'),
-              keyboardType: TextInputType.number,
-              onChanged: (val) => quantity = val,
-            ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Your Workshop Name'),
-              onChanged: (val) => myWorkshopName = val,
+            const Center(
+              child: Text('Request Inventory', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await sendRequest();
-                Navigator.pop(context);
-              },
-              child: const Text('Send Request'),
+            _buildLabel('Inventory Name'),
+            _buildReadOnlyField(data['inventoryName'] ?? 'N/A'),
+
+            const SizedBox(height: 15),
+            _buildLabel('Available Quantity'),
+            _buildReadOnlyField(maxQty.toString()),
+
+            const SizedBox(height: 15),
+            _buildLabel('Quantity to Request'),
+            DropdownButtonFormField<String>(
+              value: selectedQuantity,
+              items: List.generate(maxQty, (index) {
+                final value = (index + 1).toString();
+                return DropdownMenuItem(value: value, child: Text(value));
+              }),
+              onChanged: (val) => setState(() => selectedQuantity = val),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+            _buildLabel('Your Workshop Name'),
+            TextFormField(
+              controller: myWorkshopNameController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter your workshop name',
+              ),
+            ),
+
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (selectedQuantity != null && myWorkshopNameController.text.isNotEmpty) {
+                    await sendRequest();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Request submitted")));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please complete all fields")));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+                child: const Text('Send Request', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildLabel(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildReadOnlyField(String value) {
+    return TextField(
+      controller: TextEditingController(text: value),
+      readOnly: true,
+      decoration: const InputDecoration(border: OutlineInputBorder()),
+    );
+  }
+
+  @override
+  void dispose() {
+    myWorkshopNameController.dispose();
+    super.dispose();
   }
 }

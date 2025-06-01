@@ -1,35 +1,35 @@
 class Inventory {
   final String id;
-  final String name;
-  final String supplier;
-  final String notes;
+  final String inventoryName;     // formerly 'name'
+  final String workshopName;      // formerly 'supplier'
+  final String workshopAddress;   // formerly 'shopName'
+  final String additionalNotes;   // formerly 'notes'
   final String category;
   final int quantity;
   final double unitPrice;
-  final String shopName;
   final DateTime createdAt;
 
   Inventory({
     this.id = '',
-    required this.name,
-    required this.supplier,
-    required this.notes,
+    required this.inventoryName,
+    required this.workshopName,
+    required this.workshopAddress,
+    required this.additionalNotes,
     required this.category,
     required this.quantity,
     required this.unitPrice,
-    this.shopName = '',
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
+      'inventoryName': inventoryName,
+      'workshopName': workshopName,
+      'workshopAddress': workshopAddress,
+      'additionalNotes': additionalNotes,
+      'category': category,
       'quantity': quantity,
       'unitPrice': unitPrice,
-      'supplier': supplier,
-      'shopName': shopName,
-      'notes': notes,
-      'category': category,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -37,13 +37,13 @@ class Inventory {
   factory Inventory.fromMap(Map<String, dynamic> map, [String id = '']) {
     return Inventory(
       id: id,
-      name: map['name'] ?? '',
-      quantity: map['quantity'] ?? 0,
-      unitPrice: (map['unitPrice'] as num).toDouble(),
-      supplier: map['supplier'] ?? '',
-      shopName: map['shopName'] ?? '',
-      notes: map['notes'] ?? '',
+      inventoryName: map['inventoryName'] ?? '',
+      workshopName: map['workshopName'] ?? '',
+      workshopAddress: map['workshopAddress'] ?? '',
+      additionalNotes: map['additionalNotes'] ?? '',
       category: map['category'] ?? '',
+      quantity: map['quantity'] ?? 0,
+      unitPrice: (map['unitPrice'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
     );
   }

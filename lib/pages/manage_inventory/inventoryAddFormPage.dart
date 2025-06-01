@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
@@ -11,70 +12,164 @@ class InventoryAddFormPage extends StatefulWidget {
 }
 
 class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController workshopNameController = TextEditingController();
+  final TextEditingController inventoryNameController = TextEditingController();
+  final TextEditingController workshopAddressController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
+  final TextEditingController unitPriceController = TextEditingController();
+  final TextEditingController additionalNotesController = TextEditingController();
 
-  final _formKey = GlobalKey<FormState>();
+  final List<String> categories = [
+    'Tools & Equipment',
+    'Engine & Mechanical Parts',
+    'Electrical Components',
+    'Fluids & Lubricants',
+    'Tyres & Wheels',
+    'Body & Interior Parts',
+    'Consumables & Fasteners',
+    'Safety & Cleaning Supplies',
+  ];
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      FirebaseFirestore.instance.collection('inventory').add({
-        'name': _nameController.text,
-        'quantity': int.parse(_quantityController.text),
-        'description': _descriptionController.text,
-      });
-      Navigator.pop(context);
-    }
-  }
+  String selectedCategory = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ownerHeader(context),
       bottomNavigationBar: ownerFooter(context),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Item Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter item name';
-                  }
-                  return null;
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Text(
+                'Add Inventory',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            _buildTextField(workshopNameController, 'Workshop Name'),
+            _buildTextField(inventoryNameController, 'Inventory Name'),
+            _buildTextField(workshopAddressController, 'Workshop Address'),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    quantityController,
+                    'Quantity',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildTextField(
+                    unitPriceController,
+                    'Unit Price (RM)',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+
+            _buildTextField(additionalNotesController, 'Additional Notes'),
+
+            DropdownButtonFormField<String>(
+              value: selectedCategory.isEmpty ? null : selectedCategory,
+              items: categories
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (value) => setState(() => selectedCategory = value ?? ''),
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Updated Styled Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await FirebaseFirestore.instance.collection('inventory').add({
+                    'workshopName': workshopNameController.text,
+                    'inventoryName': inventoryNameController.text,
+                    'workshopAddress': workshopAddressController.text,
+                    'quantity': int.tryParse(quantityController.text) ?? 0,
+                    'unitPrice': double.tryParse(unitPriceController.text) ?? 0.0,
+                    'additionalNotes': additionalNotesController.text,
+                    'category': selectedCategory,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+
+                  Get.snackbar('Success', 'Inventory added!');
+                  _clearFields();
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11), // Yellow
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+                child: const Text(
+                  'Add Inventory',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              TextFormField(
-                controller: _quantityController,
-                decoration: const InputDecoration(labelText: 'Quantity'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null ||
-                      value.isEmpty ||
-                      int.tryParse(value) == null) {
-                    return 'Please enter a valid quantity';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Add Item'),
-              ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 30),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  void _clearFields() {
+    workshopNameController.clear();
+    inventoryNameController.clear();
+    workshopAddressController.clear();
+    quantityController.clear();
+    unitPriceController.clear();
+    additionalNotesController.clear();
+    setState(() {
+      selectedCategory = '';
+    });
+  }
+
+  @override
+  void dispose() {
+    workshopNameController.dispose();
+    inventoryNameController.dispose();
+    workshopAddressController.dispose();
+    quantityController.dispose();
+    unitPriceController.dispose();
+    additionalNotesController.dispose();
+    super.dispose();
   }
 }

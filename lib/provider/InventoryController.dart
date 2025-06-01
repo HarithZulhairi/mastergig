@@ -3,15 +3,17 @@ import '../domain/Inventory/Inventory.dart';
 
 class InventoryController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String collectionName = 'inventories';
+  final String collectionName = 'inventory';
 
   Future<void> addInventory(Inventory inventory) async {
-    try {
-      await _firestore.collection(collectionName).add(inventory.toMap());
-    } catch (e) {
-      rethrow;
-    }
+  try {
+    final data = inventory.toMap();
+    data['createdAt'] = FieldValue.serverTimestamp();
+    await _firestore.collection(collectionName).add(data);
+  } catch (e) {
+    rethrow;
   }
+}
 
   Future<List<Inventory>> getInventoryList() async {
     try {

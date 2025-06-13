@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/LoginAndProfile/userModel.dart';
+import 'package:mastergig_app/domain/LoginAndProfile/userModel.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/provider/RegisterController.dart';
 import 'package:mastergig_app/widgets/foremanFooter.dart';
@@ -89,8 +89,8 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
     });
   }
 
-  Future<void> saveChanges() async {
-    final errorMsg = await RegisterController().updateUserProfile(
+  Future<void> editProfile() async {
+    final errorMsg = await RegisterController().editProfile(
       username: usernameController.text,
       phone: phoneController.text,
       staffNumber: staffNumberController.text,
@@ -362,7 +362,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
                           children: [
                             ElevatedButton.icon(
                               onPressed: () {
-                                isEditing ? saveChanges() : toggleEdit();
+                                isEditing ? editProfile() : toggleEdit();
                               },
                               icon: Icon(
                                 isEditing ? Icons.save : Icons.edit,

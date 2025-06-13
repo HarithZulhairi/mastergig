@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/LoginAndProfile/userModel.dart';
+import 'package:mastergig_app/domain/LoginAndProfile/userModel.dart';
 
 class RegisterController {
   static final RegisterController _instance = RegisterController._internal();
@@ -82,7 +82,7 @@ class RegisterController {
     }
   }
 
-  Future<String?> updateUserProfile({
+  Future<String?> editProfile({
     required String username,
     required String phone,
     required String staffNumber,

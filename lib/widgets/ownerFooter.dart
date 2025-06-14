@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerViewSchedulePage.dart';
 import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
+import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart'; // ✅ Added import for PayrollPage
 
 int _currentIndex = 0; // Track current tab index
 
@@ -16,6 +17,12 @@ BottomNavigationBar ownerFooter(BuildContext context) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const InventoryPage()),
+        );
+      } else if (index == 2) {
+        // ✅ Navigate to Payroll Page when engineering icon is tapped
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ownerPayrollPage()),
         );
       } else if (index == 3) {
         // Navigate to Schedule Page when calendar icon is tapped

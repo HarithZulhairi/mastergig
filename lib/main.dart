@@ -9,7 +9,7 @@ import 'firebase_options.dart';
 import 'package:mastergig_app/provider/ScheduleController.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
 import 'package:mastergig_app/pages/manage_rating/foremanRatingPage.dart';
-import 'package:mastergig_app/provider/RatingController.dart';
+import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -298,6 +298,25 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ownerPayrollPage(),
+      ),
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.teal,
+    minimumSize: const Size(double.infinity, 50),
+  ),
+  child: const Text(
+    'Go to Payroll Page',
+    style: TextStyle(fontSize: 16, color: Colors.white),
+  ),
+),
+const SizedBox(height: 20),
           ],
         ),
       ),

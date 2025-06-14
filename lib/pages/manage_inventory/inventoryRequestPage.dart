@@ -66,10 +66,12 @@ class _InventoryRequestPageState extends State<InventoryRequestPage> {
               stream: FirebaseFirestore.instance
                   .collection('inventory_requests')
                   .where(
-                    viewMode == 'Requested To Me' ? 'toWorkshop' : 'fromWorkshop',
+                    viewMode == 'Requested To Me'
+                        ? 'toWorkshop'       // ✅ You received the request
+                        : 'fromWorkshop',    // ✅ You sent the request
                     isEqualTo: widget.workshopName,
                   )
-                  .snapshots(), // 🔄 Removed .orderBy to avoid Firestore index error
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -102,8 +104,7 @@ class _InventoryRequestPageState extends State<InventoryRequestPage> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('From: ${data['fromWorkshop'] ?? '-'}'),
-                            Text('To: ${data['toWorkshop'] ?? '-'}'),
+                            Text('To: ${data['fromWorkshop'] ?? '-'}'),
                             Text('Quantity: ${data['quantity'] ?? '-'}'),
                             Text('Status: ${data['status'] ?? 'Pending'}'),
                           ],

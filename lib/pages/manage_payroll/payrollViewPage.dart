@@ -86,15 +86,42 @@ class payrollViewPage extends StatelessWidget {
                 // Pay Button
                 ElevatedButton(
                   onPressed: () async {
-    if (!StripeService.isInitialized) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment system not available')),
+    try {
+      // Show loading
+      showDialog(context: context, builder: (_) => Center(child: CircularProgressIndicator()));
+      
+      // Create payment intent via Firebase Function
+      final clientSecret = await StripeService.createPaymentIntent(
+        payment.totalPay, 
+        'myr'
       );
-      return;
+      
+      // Dismiss loading
+      Navigator.of(context).pop();
+      
+      if (clientSecret == null) {
+        throw Exception('Failed to create payment intent');
+      }
+      
+      // Confirm payment
+      final success = await StripeService.confirmPayment(clientSecret);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment successful!')),
+        );
+        // Update Firestore payment status here
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment canceled')),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: ${e.toString()}')),
+      );
     }
-
-    // Proceed with payment handling
-    _handlePayment(context, payment.totalPay);
   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -103,6 +130,7 @@ class payrollViewPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  
                   child: const Text(
                     'Pay',
                     style: TextStyle(

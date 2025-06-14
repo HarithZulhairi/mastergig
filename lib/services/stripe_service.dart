@@ -10,25 +10,25 @@ class StripeService {
   static const String _stripeUrl = 'https://api.stripe.com/v1/payment_intents';
 
   static Future<void> initialize() async {
-    try {
-      await dotenv.load(fileName: '.env');
-      
-      // Only load publishable key here
-      final publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
-      if (publishableKey == null) {
-        throw Exception('Stripe publishable key not found');
-      }
-
-      Stripe.publishableKey = publishableKey;
-      await Stripe.instance.applySettings();
-      _initialized = true;
-      print('✅ Stripe initialized successfully');
-    } catch (e) {
-      _initialized = false;
-      print('❌ Stripe initialization failed: $e');
-      rethrow;
+  try {
+    // For web
+    await dotenv.load(fileName: 'assets/.env');
+    // OR if you put it in web folder
+    // await dotenv.load(fileName: 'web/.env');
+    
+    final publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
+    if (publishableKey == null) {
+      throw Exception('Stripe publishable key not found');
     }
+
+    Stripe.publishableKey = publishableKey;
+    await Stripe.instance.applySettings();
+    _initialized = true;
+  } catch (e) {
+    _initialized = false;
+    rethrow;
   }
+}
 
   static bool get isInitialized => _initialized;
 

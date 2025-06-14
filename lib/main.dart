@@ -7,6 +7,9 @@ import 'package:mastergig_app/pages/manage_schedule/foremanSelectSchedulePage.da
 import 'package:mastergig_app/pages/manage_inventory/inventoryAddFormPage.dart'; // <--- NEW IMPORT
 import 'firebase_options.dart';
 import 'package:mastergig_app/provider/ScheduleController.dart';
+import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
+import 'package:mastergig_app/pages/manage_rating/foremanRatingPage.dart';
+import 'package:mastergig_app/provider/RatingController.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -253,6 +256,48 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
+            const SizedBox(height: 20),
+            // 🔹 NEW: Go to Owner Rating Page
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ownerRatingPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Owner Rating Page',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // NEW: Foreman Rating Page Button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => foremanRatingPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple, // Different color to distinguish
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'Foreman Rating Page',
+                style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 255, 255, 255)),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

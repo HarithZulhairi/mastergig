@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerViewSchedulePage.dart';
 import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
+import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
 
 int _currentIndex = 0; // Track current tab index
 
@@ -22,6 +23,12 @@ BottomNavigationBar ownerFooter(BuildContext context) {
           context,
           MaterialPageRoute(builder: (context) => const OwnerViewSchedulePage()),
         );
+      } else if (index == 4) {
+        // Navigate to Rating Page when star icon is tapped
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ownerRatingPage()),
+        );
       }
     },
     backgroundColor: const Color(0xBBBCBCBC),
@@ -41,7 +48,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
                 ? Colors.black.withOpacity(0.1)
                 : Colors.transparent,
           ),
-          child: const Icon(Icons.home, size: 50),
+          child: const Icon(Icons.home, size: 40),
         ),
         label: '',
       ),
@@ -54,7 +61,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
                 ? Colors.black.withOpacity(0.1)
                 : Colors.transparent,
           ),
-          child: const Icon(Icons.outbox, size: 50),
+          child: const Icon(Icons.outbox, size: 40),
         ),
         label: '',
       ),
@@ -67,7 +74,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
                 ? Colors.black.withOpacity(0.1)
                 : Colors.transparent,
           ),
-          child: const Icon(Icons.engineering, size: 50),
+          child: const Icon(Icons.engineering, size: 40),
         ),
         label: '',
       ),
@@ -80,7 +87,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
                 ? Colors.black.withOpacity(0.1)
                 : Colors.transparent,
           ),
-          child: const Icon(Icons.calendar_month, size: 50),
+          child: const Icon(Icons.calendar_month, size: 40),
         ),
         label: '',
       ),
@@ -93,7 +100,20 @@ BottomNavigationBar ownerFooter(BuildContext context) {
                 ? Colors.black.withOpacity(0.1)
                 : Colors.transparent,
           ),
-          child: const Icon(Icons.settings, size: 50),
+          child: const Icon(Icons.star, size: 40),
+        ),
+        label: '',
+      ),
+      BottomNavigationBarItem(
+        icon: Container(
+          padding: const EdgeInsets.all(0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: _currentIndex == 5
+                ? Colors.black.withOpacity(0.1)
+                : Colors.transparent,
+          ),
+          child: const Icon(Icons.settings, size: 40),
         ),
         label: '',
       ),

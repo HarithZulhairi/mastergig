@@ -85,7 +85,17 @@ class payrollViewPage extends StatelessWidget {
                 const SizedBox(width: 20),
                 // Pay Button
                 ElevatedButton(
-                  onPressed: () => _handlePayment(context, payment.totalPay),
+                  onPressed: () async {
+    if (!StripeService.isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment system not available')),
+      );
+      return;
+    }
+
+    // Proceed with payment handling
+    _handlePayment(context, payment.totalPay);
+  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),

@@ -6,7 +6,7 @@ class StripeService {
   static const String _stripePublishableKey = 'pk_test_51RZsuuGhg7kZxWbUakW0Kn1hQ5luQWaRKHCXJP8zb8xZZjFD0FXZbjyXMJu0oEsaoMuywzzdcafHYcOSu7Pulwka004ClWlSti';
   static const String _stripeUrl = 'https://api.stripe.com/v1/payment_intents';
 
-  static Future<void> init() async {
+  static Future<void> initialize() async {
     Stripe.publishableKey = _stripePublishableKey;
     await Stripe.instance.applySettings();
   }
@@ -16,7 +16,7 @@ class StripeService {
       final response = await http.post(
         Uri.parse(_stripeUrl),
         headers: {
-          'Authorization': 'Bearer YOUR_STRIPE_SECRET_KEY',
+          'Authorization': 'Bearer sk_test_51RZsuuGhg7kZxWbUmUrXThE1dCuuZm0J1lgcO4bbnBR1g6JQmPL8HKI0LfYZ1Oc8oHWup0zNwWyGh0XQ6CmplZg800IuHLGWMu',
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: {
@@ -29,6 +29,23 @@ class StripeService {
     } catch (e) {
       print('Stripe Error: $e');
       return null;
+    }
+  }
+
+  static Future<bool> confirmPayment(String clientSecret) async {
+    try {
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'MasterGig Workshop',
+        ),
+      );
+      
+      await Stripe.instance.presentPaymentSheet();
+      return true;
+    } catch (e) {
+      print('Payment Error: $e');
+      return false;
     }
   }
 }

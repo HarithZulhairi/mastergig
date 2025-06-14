@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mastergig_app/domain/Payroll/Payment.dart';
+import 'package:mastergig_app/services/stripe_service.dart';
 
 class payrollViewPage extends StatelessWidget {
   final Payment payment;
@@ -84,15 +85,7 @@ class payrollViewPage extends StatelessWidget {
                 const SizedBox(width: 20),
                 // Pay Button
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement payment functionality
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Payment functionality will be implemented here'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onPressed: () => _handlePayment(context, payment.totalPay),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
@@ -115,6 +108,55 @@ class payrollViewPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handlePayment(BuildContext context, double amount) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // 1. Create payment intent on Stripe server
+      final clientSecret = await StripeService.createPaymentIntent(amount, 'myr');
+      
+      if (clientSecret == null) {
+        Navigator.pop(context); // Remove loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create payment intent')),
+        );
+        return;
+      }
+
+      // 2. Confirm the payment
+      final paymentSuccess = await StripeService.confirmPayment(clientSecret);
+      Navigator.pop(context); // Remove loading
+
+      if (paymentSuccess) {
+        // Payment was successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment successful!')),
+        );
+        
+        // Here you might want to update your database to mark this payment as completed
+        // For example:
+        // await FirebaseFirestore.instance.collection('payments').doc(payment.id).update({'status': 'paid'});
+        
+        // Optionally navigate back
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment failed or was canceled')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Remove loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 
   Widget _buildDetailRow(String label, String value) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
 import 'package:mastergig_app/pages/manage_schedule/foremanSelectSchedulePage.dart';
@@ -10,10 +11,12 @@ import 'package:mastergig_app/provider/ScheduleController.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
 import 'package:mastergig_app/pages/manage_rating/foremanRatingPage.dart';
 import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart';
+import 'package:mastergig_app/services/stripe_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  //await StripeService.initialize();
   ScheduleController().startScheduleCleanupTask();
   runApp(const MainApp());
 }

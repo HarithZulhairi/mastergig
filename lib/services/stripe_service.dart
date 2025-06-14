@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class StripeService {
-  static const String _stripePublishableKey = 'pk_test_...';
+  static const String _stripePublishableKey = 'pk_test_51RZsuuGhg7kZxWbUakW0Kn1hQ5luQWaRKHCXJP8zb8xZZjFD0FXZbjyXMJu0oEsaoMuywzzdcafHYcOSu7Pulwka004ClWlSti';
   static const String _stripeUrl = 'https://api.stripe.com/v1/payment_intents';
 
   static Future<void> initialize() async {
@@ -16,6 +16,7 @@ class StripeService {
       final response = await http.post(
         Uri.parse(_stripeUrl),
         headers: {
+          'Authorization': 'Bearer sk_test_51RZsuuGhg7kZxWbUmUrXThE1dCuuZm0J1lgcO4bbnBR1g6JQmPL8HKI0LfYZ1Oc8oHWup0zNwWyGh0XQ6CmplZg800IuHLGWMu',
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: {

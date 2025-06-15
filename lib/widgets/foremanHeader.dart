@@ -53,7 +53,7 @@ AppBar foremanHeader(BuildContext context) {
       ],
     ),
     centerTitle: true,
-    backgroundColor: const Color(0xDDDFDFD9),
+    backgroundColor: const Color(0xFFFFC100),
     elevation: 0,
     toolbarHeight: 100,
     shape: const RoundedRectangleBorder(

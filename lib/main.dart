@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/pages/manage_schedule/ownerAddFormSchedulePage.dart';
 import 'package:mastergig_app/pages/manage_schedule/foremanSelectSchedulePage.dart';
@@ -15,10 +15,44 @@ import 'package:mastergig_app/services/stripe_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  //await StripeService.initialize();
-  ScheduleController().startScheduleCleanupTask();
-  runApp(const MainApp());
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    print('Firebase initialized successfully');
+    
+    try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await dotenv.load(fileName: '.env');
+    
+    // Initialize Stripe
+    await StripeService.initialize();
+    
+    runApp(const MainApp());
+  } catch (e) {
+    runApp(const ErrorApp());
+  }
+    
+    ScheduleController().startScheduleCleanupTask();
+    runApp(const MainApp());
+  } catch (e, stackTrace) {  // Add stackTrace parameter here too
+    print('Global initialization error: $e');
+    debugPrintStack(stackTrace: stackTrace);
+    runApp(const ErrorApp());
+  }
+}
+
+class ErrorApp extends StatelessWidget {
+  const ErrorApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization error occurred'),
+        ),
+      ),
+    );
+  }
 }
 
 class MainApp extends StatelessWidget {
@@ -29,7 +63,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'MasterGig Workshop',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const FirebaseTestScreen(),
+      home: const Login(),
       debugShowCheckedModeBanner: false,
     );
   }

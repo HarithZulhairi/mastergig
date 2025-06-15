@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/pages/OwnerProfile.dart
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/domain/LoginAndProfile/userModel.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
+import 'package:mastergig_app/provider/RegisterController.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 
@@ -18,173 +19,112 @@ class _OwnerProfileState extends State<OwnerProfile> {
   userModel? owner;
   bool isLoading = true;
   bool isEditing = false;
+  bool obscurePassword = true;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController staffNumberController = TextEditingController();
   final TextEditingController licenseNumberController = TextEditingController();
   final TextEditingController roleController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  bool obscurePassword = true; // <-- Added for password visibility toggle
+  final RegisterController _registerController = RegisterController();
 
   @override
   void initState() {
     super.initState();
-    loadOwnerProfile();
+    _loadOwnerProfile();
   }
 
-  Future<void> loadOwnerProfile() async {
-    final email = widget.ownerEmail;
-
-    if (email.isEmpty) {
-      setState(() => isLoading = false);
-      return;
-    }
-
+  Future<void> _loadOwnerProfile() async {
+    setState(() => isLoading = true);
     try {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('username', isEqualTo: email)
-              .limit(1)
-              .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        final data = snapshot.docs.first.data();
-        setState(() {
-          owner = userModel(
-            name: data['name'] ?? '',
-            username: data['username'] ?? '',
-            phone: data['phone'] ?? '',
-            password: data['password'] ?? '',
-            staffNumber: data['staffNumber'] ?? '',
-            licenseNumber: data['licenseNumber'] ?? '',
-            role: data['role'] ?? '',
-          );
-
-          nameController.text = owner!.name;
-          usernameController.text = owner!.username;
-          phoneController.text = owner!.phone;
-          staffNumberController.text = owner!.staffNumber;
-          licenseNumberController.text = owner!.licenseNumber;
-          roleController.text = owner!.role;
-          passwordController.text = owner!.password;
-        });
+      final user = await _registerController.getUserProfile(widget.ownerEmail);
+      if (user != null) {
+        _populateControllers(user);
       }
-    } catch (e) {
-      debugPrint("Error retrieving owner data: $e");
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void toggleEdit() {
+  void _populateControllers(userModel user) {
     setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        // Reset password field visibility when exiting edit mode
-        obscurePassword = true;
-      }
+      owner = user;
+      nameController.text = owner!.name;
+      usernameController.text = owner!.username;
+      phoneController.text = owner!.phone;
+      licenseNumberController.text = owner!.licenseNumber;
+      roleController.text = owner!.role;
+      passwordController.text = owner!.password;
     });
   }
 
-  Future<void> editProfile() async {
-    try {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('username', isEqualTo: widget.ownerEmail)
-              .limit(1)
-              .get();
+  void _toggleEdit() {
+    setState(() {
+      isEditing = !isEditing;
+      if (!isEditing) obscurePassword = true;
+    });
+  }
 
-      if (snapshot.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(snapshot.docs.first.id)
-            .update({
-              'name': nameController.text,
-              'phone': phoneController.text,
-              'licenseNumber': licenseNumberController.text,
-              'password': passwordController.text,
-            });
+  Future<void> _updateProfile() async {
+    final error = await _registerController.updateProfile(
+      email: widget.ownerEmail,
+      name: nameController.text,
+      phone: phoneController.text,
+      licenseNumber: licenseNumberController.text,
+      password: passwordController.text,
+      staffNumber: '', // Add empty string since it's required in the controller
+    );
 
-        // Show dialog on successful update
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            Future.delayed(const Duration(milliseconds: 1000), () {
-              Navigator.of(context).pop();
-            });
-            return AlertDialog(
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              ),
-              title: const Center(
-                child: Text(
-                  'Successfully edited!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 32,
-                  ),
-                ),
-              ),
-              content: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 100,
-              ),
-            );
-          },
-        );
-
-        toggleEdit(); // Exit editing mode
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User not found in database")),
-        );
-      }
-    } catch (e) {
-      debugPrint("Error saving profile: $e");
+    if (error == null) {
+      _registerController.showSuccessDialog(context, title: 'Profile Updated!');
+      await _loadOwnerProfile();
+      _toggleEdit();
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to save changes: $e")));
+      ).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 
-  Future<void> deleteAccount() async {
-    try {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('username', isEqualTo: widget.ownerEmail)
-              .limit(1)
-              .get();
+  Future<void> _deleteAccount() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Confirm Deletion"),
+            content: const Text(
+              "Are you sure you want to delete your account? This action cannot be undone.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  "Delete",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
 
-      if (snapshot.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(snapshot.docs.first.id)
-            .delete();
+    if (confirm != true) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account deleted successfully")),
-        );
-
-        // Redirect to login page and remove all previous routes
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const Login()),
-          (Route<dynamic> route) => false,
-        );
-      }
-    } catch (e) {
-      debugPrint("Error deleting account: $e");
+    final error = await _registerController.deleteAccount(widget.ownerEmail);
+    if (error == null && context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const Login()),
+        (Route<dynamic> route) => false,
+      );
+    } else if (error != null && context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to delete account: $e")));
+      ).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 
@@ -193,14 +133,13 @@ class _OwnerProfileState extends State<OwnerProfile> {
     nameController.dispose();
     usernameController.dispose();
     phoneController.dispose();
-    staffNumberController.dispose();
     licenseNumberController.dispose();
     roleController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
-  InputDecoration getFieldDecoration(String label) {
+  InputDecoration _getFieldDecoration(String label) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(
@@ -213,7 +152,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
     );
   }
 
-  TextStyle getTextStyle() {
+  TextStyle _getTextStyle() {
     return const TextStyle(color: Colors.black, fontWeight: FontWeight.bold);
   }
 
@@ -237,7 +176,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                       children: [
                         Text(
                           'Profile',
-                          style: Theme.of(context).textTheme.headline5
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 24),
@@ -253,23 +192,25 @@ class _OwnerProfileState extends State<OwnerProfile> {
                               TextFormField(
                                 controller: nameController,
                                 enabled: isEditing,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Name'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration('Full Name'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: usernameController,
                                 enabled: false,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Email Address'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
+                                  'Email Address',
+                                ),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: phoneController,
                                 enabled: isEditing,
                                 keyboardType: TextInputType.phone,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration(
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
                                   'Contact Information',
                                 ),
                               ),
@@ -277,8 +218,8 @@ class _OwnerProfileState extends State<OwnerProfile> {
                               TextFormField(
                                 controller: licenseNumberController,
                                 enabled: isEditing,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration(
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
                                   'License Number',
                                 ),
                               ),
@@ -286,16 +227,15 @@ class _OwnerProfileState extends State<OwnerProfile> {
                               TextFormField(
                                 controller: roleController,
                                 enabled: false,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Role'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration('Role'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: passwordController,
                                 enabled: isEditing,
                                 obscureText: obscurePassword,
-                                keyboardType: TextInputType.visiblePassword,
-                                style: getTextStyle(),
+                                style: _getTextStyle(),
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   labelStyle: const TextStyle(
@@ -333,7 +273,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                           children: [
                             ElevatedButton.icon(
                               onPressed: () {
-                                isEditing ? editProfile() : toggleEdit();
+                                isEditing ? _updateProfile() : _toggleEdit();
                               },
                               icon: Icon(
                                 isEditing ? Icons.save : Icons.edit,
@@ -344,9 +284,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                                 style: const TextStyle(color: Colors.black),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(
-                                  0xFFFFF18E,
-                                ), // golden yellow
+                                backgroundColor: const Color(0xFFFFF18E),
                                 foregroundColor: Colors.black,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 36,
@@ -357,38 +295,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                             ),
                             const SizedBox(width: 12),
                             ElevatedButton.icon(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder:
-                                      (context) => AlertDialog(
-                                        title: const Text("Confirm Deletion"),
-                                        content: const Text(
-                                          "Are you sure you want to delete your account? This action cannot be undone.",
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed:
-                                                () =>
-                                                    Navigator.of(context).pop(),
-                                            child: const Text("Cancel"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              deleteAccount();
-                                            },
-                                            child: const Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                );
-                              },
+                              onPressed: _deleteAccount,
                               icon: const Icon(
                                 Icons.delete,
                                 color: Colors.black,
@@ -398,9 +305,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                                 style: TextStyle(color: Colors.black),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(
-                                  0xFFFF8E90,
-                                ), // soft red-pink
+                                backgroundColor: const Color(0xFFFF8E90),
                                 foregroundColor: Colors.black,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 36,
@@ -418,9 +323,4 @@ class _OwnerProfileState extends State<OwnerProfile> {
               ),
     );
   }
-}
-
-// Fix for headline5 in older Flutter versions
-extension on TextTheme {
-  TextStyle? get headline5 => titleLarge;
 }

@@ -85,7 +85,44 @@ class payrollViewPage extends StatelessWidget {
                 const SizedBox(width: 20),
                 // Pay Button
                 ElevatedButton(
-                  onPressed: () => _handlePayment(context, payment.totalPay),
+                  onPressed: () async {
+    try {
+      // Show loading
+      showDialog(context: context, builder: (_) => Center(child: CircularProgressIndicator()));
+      
+      // Create payment intent via Firebase Function
+      final clientSecret = await StripeService.createPaymentIntent(
+        payment.totalPay, 
+        'myr'
+      );
+      
+      // Dismiss loading
+      Navigator.of(context).pop();
+      
+      if (clientSecret == null) {
+        throw Exception('Failed to create payment intent');
+      }
+      
+      // Confirm payment
+      final success = await StripeService.confirmPayment(clientSecret);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment successful!')),
+        );
+        // Update Firestore payment status here
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment canceled')),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: ${e.toString()}')),
+      );
+    }
+  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
@@ -93,6 +130,7 @@ class payrollViewPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  
                   child: const Text(
                     'Pay',
                     style: TextStyle(

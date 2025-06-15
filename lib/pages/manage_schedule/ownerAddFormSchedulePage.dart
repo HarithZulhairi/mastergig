@@ -411,7 +411,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -443,7 +443,7 @@ class _OwnerAddFormSchedulePageState extends State<OwnerAddFormSchedulePage> {
                       'View Schedule List',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

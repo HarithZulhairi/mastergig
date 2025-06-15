@@ -1,19 +1,29 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require('firebase-functions');
+const Stripe = require('stripe');
+const cors = require('cors')({ origin: true });
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+const stripe = Stripe(functions.config().stripe.secret);
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+exports.createPaymentIntent = functions.https.onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      return res.status(405).send('Method Not Allowed');
+    }
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    try {
+      const { amount, currency } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+      });
+
+      res.status(200).json({
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (err) {
+      console.error('Error creating payment intent:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});

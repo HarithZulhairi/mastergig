@@ -111,19 +111,6 @@ BottomNavigationBar ownerFooter(BuildContext context) {
         ),
         label: '',
       ),
-      BottomNavigationBarItem(
-        icon: Container(
-          padding: const EdgeInsets.all(0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: _currentIndex == 5
-                ? Colors.black.withOpacity(0.1)
-                : Colors.transparent,
-          ),
-          child: const Icon(Icons.settings, size: 40),
-        ),
-        label: '',
-      ),
     ],
   );
 }

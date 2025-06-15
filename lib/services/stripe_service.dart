@@ -1,51 +1,81 @@
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/material.dart';
 
 class StripeService {
-  static const String _stripePublishableKey = 'pk_test_51RZsuuGhg7kZxWbUakW0Kn1hQ5luQWaRKHCXJP8zb8xZZjFD0FXZbjyXMJu0oEsaoMuywzzdcafHYcOSu7Pulwka004ClWlSti';
+  static bool _initialized = false;
+  static String? _stripeSecretKey;
   static const String _stripeUrl = 'https://api.stripe.com/v1/payment_intents';
 
   static Future<void> initialize() async {
-    Stripe.publishableKey = _stripePublishableKey;
+  try {
+    // For web
+    await dotenv.load(fileName: 'assets/.env');
+    // OR if you put it in web folder
+    // await dotenv.load(fileName: 'web/.env');
+    
+    final publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
+    if (publishableKey == null) {
+      throw Exception('Stripe publishable key not found');
+    }
+
+    Stripe.publishableKey = publishableKey;
     await Stripe.instance.applySettings();
+    _initialized = true;
+  } catch (e) {
+    _initialized = false;
+    rethrow;
   }
+}
+
+  static bool get isInitialized => _initialized;
 
   static Future<String?> createPaymentIntent(double amount, String currency) async {
     try {
       final response = await http.post(
-        Uri.parse(_stripeUrl),
-        headers: {
-          'Authorization': 'Bearer sk_test_51RZsuuGhg7kZxWbUmUrXThE1dCuuZm0J1lgcO4bbnBR1g6JQmPL8HKI0LfYZ1Oc8oHWup0zNwWyGh0XQ6CmplZg800IuHLGWMu',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: {
-          'amount': (amount * 100).toStringAsFixed(0), // in cents
+        Uri.parse('https://your-firebase-function-url/createPaymentIntent'),
+        body: jsonEncode({
+          'amount': amount,
           'currency': currency,
-        },
+        }),
+        headers: {'Content-Type': 'application/json'},
       );
 
-      return jsonDecode(response.body)['client_secret'];
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['clientSecret'];
+      } else {
+        throw Exception('Failed to create payment intent');
+      }
     } catch (e) {
-      print('Stripe Error: $e');
-      return null;
+      print('Payment intent error: $e');
+      rethrow;
     }
   }
 
   static Future<bool> confirmPayment(String clientSecret) async {
-    try {
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'MasterGig Workshop',
+  try {
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: 'MasterGig Workshop',
+        appearance: PaymentSheetAppearance(
+          colors: PaymentSheetAppearanceColors(
+            primary: Color(0xFFFFF18E),
+          ),
         ),
-      );
-      
-      await Stripe.instance.presentPaymentSheet();
-      return true;
-    } catch (e) {
-      print('Payment Error: $e');
-      return false;
-    }
+        googlePay: PaymentSheetGooglePay(  // Moved outside appearance
+          merchantCountryCode: 'MY',
+          testEnv: true,
+        ),
+      ),
+    );
+    await Stripe.instance.presentPaymentSheet();
+    return true;
+  } catch (e) {
+    print('Payment error: $e');
+    return false;
   }
+}
 }

@@ -100,6 +100,7 @@ BottomNavigationBar ownerFooter(BuildContext context) {
       ),
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       BottomNavigationBarItem(
         icon: Container(
           padding: const EdgeInsets.all(0),
@@ -126,6 +127,8 @@ BottomNavigationBar ownerFooter(BuildContext context) {
         ),
         label: '',
       ),
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======

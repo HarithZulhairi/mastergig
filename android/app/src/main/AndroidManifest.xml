@@ -6,8 +6,12 @@
         android:label="mastergig_app"
         android:name="${applicationName}"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         android:icon="@mipmap/ic_launcher">
         
+=======
+        android:icon="@mipmap/launcher_icon">
+>>>>>>> Stashed changes
 =======
         android:icon="@mipmap/launcher_icon">
 >>>>>>> Stashed changes

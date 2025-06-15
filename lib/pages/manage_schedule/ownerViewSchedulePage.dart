@@ -84,7 +84,7 @@ class OwnerViewSchedulePage extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -111,7 +111,7 @@ class OwnerViewSchedulePage extends StatelessWidget {
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                             ),
                           ),

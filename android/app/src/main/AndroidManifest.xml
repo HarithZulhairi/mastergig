@@ -5,8 +5,12 @@
     <application
         android:label="mastergig_app"
         android:name="${applicationName}"
+<<<<<<< Updated upstream
         android:icon="@mipmap/ic_launcher">
         
+=======
+        android:icon="@mipmap/launcher_icon">
+>>>>>>> Stashed changes
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -63,7 +63,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'MasterGig Workshop',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const FirebaseTestScreen(),
+      home: const Login(),
       debugShowCheckedModeBanner: false,
     );
   }

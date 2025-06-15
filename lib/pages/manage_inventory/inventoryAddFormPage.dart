@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
-import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart'; // Make sure this import path is correct
+import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
+import 'package:mastergig_app/provider/InventoryController.dart';
+import 'package:mastergig_app/domain/Inventory/Inventory.dart';
 
 class InventoryAddFormPage extends StatefulWidget {
   const InventoryAddFormPage({super.key});
@@ -13,6 +14,8 @@ class InventoryAddFormPage extends StatefulWidget {
 }
 
 class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
+  final InventoryController _controller = InventoryController();
+
   final TextEditingController workshopNameController = TextEditingController();
   final TextEditingController inventoryNameController = TextEditingController();
   final TextEditingController workshopAddressController = TextEditingController();
@@ -50,11 +53,9 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
               ),
             ),
             const SizedBox(height: 20),
-
             _buildTextField(workshopNameController, 'Workshop Name'),
             _buildTextField(inventoryNameController, 'Inventory Name'),
             _buildTextField(workshopAddressController, 'Workshop Address'),
-
             Row(
               children: [
                 Expanded(
@@ -74,9 +75,7 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 ),
               ],
             ),
-
             _buildTextField(additionalNotesController, 'Additional Notes'),
-
             DropdownButtonFormField<String>(
               value: selectedCategory.isEmpty ? null : selectedCategory,
               items: categories
@@ -88,7 +87,6 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 30),
 
             // Add Inventory Button
@@ -96,19 +94,23 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  await FirebaseFirestore.instance.collection('inventory').add({
-                    'workshopName': workshopNameController.text,
-                    'inventoryName': inventoryNameController.text,
-                    'workshopAddress': workshopAddressController.text,
-                    'quantity': int.tryParse(quantityController.text) ?? 0,
-                    'unitPrice': double.tryParse(unitPriceController.text) ?? 0.0,
-                    'additionalNotes': additionalNotesController.text,
-                    'category': selectedCategory,
-                    'createdAt': FieldValue.serverTimestamp(),
-                  });
+                  try {
+                    final inventory = Inventory(
+                      workshopName: workshopNameController.text,
+                      inventoryName: inventoryNameController.text,
+                      workshopAddress: workshopAddressController.text,
+                      quantity: int.tryParse(quantityController.text) ?? 0,
+                      unitPrice: double.tryParse(unitPriceController.text) ?? 0.0,
+                      additionalNotes: additionalNotesController.text,
+                      category: selectedCategory,
+                    );
 
-                  Get.snackbar('Success', 'Inventory added!');
-                  _clearFields();
+                    await _controller.addInventory(inventory);
+                    Get.snackbar('Success', 'Inventory added!');
+                    _clearFields();
+                  } catch (e) {
+                    Get.snackbar('Error', 'Failed to add inventory');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(238, 239, 211, 11),
@@ -140,7 +142,7 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(238, 239, 211, 11),
-                  foregroundColor: const Color.fromARGB(255, 14, 13, 13),
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
@@ -153,7 +155,6 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 30),
           ],
         ),

@@ -11,6 +11,8 @@ class RegisterController {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // ==================== AUTHENTICATION METHODS ====================
+
   // Sign Up with full validation
   Future<String?> signUp({
     required String name,
@@ -73,43 +75,137 @@ class RegisterController {
     }
   }
 
-  // Helper to show success dialog
-  Future<void> _showSuccessDialog(
-    BuildContext context, {
-    required String title,
-    required VoidCallback onComplete,
+  // Sign In
+  Future<String?> signIn({
+    required String email,
+    required String password,
+    required String role,
   }) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        Future.delayed(const Duration(seconds: 1), () {
-          Navigator.of(context).pop();
-          onComplete();
-        });
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          ),
-          title: Center(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
-            ),
-          ),
-          content: const Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 80,
-          ),
-        );
-      },
-    );
+    try {
+      final query =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (query.docs.isEmpty) {
+        return "User not found";
+      }
+
+      final userData = query.docs.first.data();
+
+      if (userData['password'] != password) {
+        return "Incorrect password";
+      }
+
+      if (userData['role']?.toLowerCase() != role.toLowerCase()) {
+        return "You are not registered as $role";
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint("Error during login: $e");
+      return "Login failed. Please try again.";
+    }
   }
+
+  // ==================== PROFILE MANAGEMENT METHODS ====================
+
+  // Get User Profile by Email
+  Future<userModel?> getUserProfile(String email) async {
+    try {
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isEmpty) {
+        debugPrint("No user found with email: $email");
+        return null;
+      }
+
+      final doc = snapshot.docs.first;
+      final data = doc.data();
+
+      debugPrint("Retrieved user data: ${data.toString()}");
+
+      return userModel(
+        name: data['name'] ?? '',
+        username: data['username'] ?? data['email'] ?? '',
+        phone: data['phone'] ?? '',
+        password: data['password'] ?? '',
+        staffNumber: data['staffNumber'] ?? '',
+        licenseNumber: data['licenseNumber'] ?? '',
+        role: data['role'] ?? '',
+      );
+    } catch (e) {
+      debugPrint("Error retrieving user data: $e");
+      return null;
+    }
+  }
+
+  // Update User Profile
+  Future<String?> updateProfile({
+    required String email,
+    required String name,
+    required String phone,
+    required String staffNumber,
+    required String licenseNumber,
+    required String password,
+  }) async {
+    try {
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isEmpty) {
+        return "User not found";
+      }
+
+      await _firestore.collection('users').doc(snapshot.docs.first.id).update({
+        'name': name,
+        'phone': phone,
+        'staffNumber': staffNumber,
+        'licenseNumber': licenseNumber,
+        'password': password,
+      });
+
+      return null;
+    } catch (e) {
+      debugPrint("Error updating profile: $e");
+      return "Failed to update profile: $e";
+    }
+  }
+
+  // Delete Account
+  Future<String?> deleteAccount(String email) async {
+    try {
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isEmpty) {
+        return "Account not found";
+      }
+
+      await _firestore.collection('users').doc(snapshot.docs.first.id).delete();
+      return null;
+    } catch (e) {
+      debugPrint("Error deleting account: $e");
+      return "Failed to delete account: $e";
+    }
+  }
+
+  // ==================== VALIDATION METHODS ====================
 
   // Email validation
   String? validateEmail(String? value) {
@@ -148,154 +244,48 @@ class RegisterController {
     return null;
   }
 
-  // Sign In
-  Future<String?> signIn({
-    required String email,
-    required String password,
-    required String role,
+  // ==================== UI HELPERS ====================
+
+  // Show Success Dialog
+  Future<void> _showSuccessDialog(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onComplete,
   }) async {
-    try {
-      final query =
-          await _firestore
-              .collection('users')
-              .where('username', isEqualTo: email)
-              .limit(1)
-              .get();
-
-      if (query.docs.isEmpty) {
-        return "User not found";
-      }
-
-      final userData = query.docs.first.data();
-
-      if (userData['password'] != password) {
-        return "Incorrect password";
-      }
-
-      if (userData['role']?.toLowerCase() != role.toLowerCase()) {
-        return "You are not registered as $role";
-      }
-
-      return null;
-    } catch (e) {
-      debugPrint("Error during login: $e");
-      return "Login failed. Please try again.";
-    }
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.of(context).pop();
+          onComplete();
+        });
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          ),
+          title: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          content: const Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 80,
+          ),
+        );
+      },
+    );
   }
 
-  // Get User by Email - Fixed to properly retrieve all fields
-  Future<userModel?> getUserByEmail(String email) async {
-    try {
-      final snapshot =
-          await _firestore
-              .collection('users')
-              .where('username', isEqualTo: email)
-              .limit(1)
-              .get();
-
-      if (snapshot.docs.isEmpty) {
-        debugPrint("No user found with email: $email");
-        return null;
-      }
-
-      final doc = snapshot.docs.first;
-      final data = doc.data();
-
-      debugPrint("Retrieved user data: ${data.toString()}");
-
-      return userModel(
-        name: data['name'] ?? '',
-        username:
-            data['username'] ??
-            data['email'] ??
-            '', // Handle both 'username' and 'email' fields
-        phone: data['phone'] ?? '',
-        password: data['password'] ?? '',
-        staffNumber: data['staffNumber'] ?? '',
-        licenseNumber: data['licenseNumber'] ?? '',
-        role: data['role'] ?? '',
-      );
-    } catch (e) {
-      debugPrint("Error retrieving user data: $e");
-      return null;
-    }
-  }
-
-  // Edit Profile - Fixed to update all fields
-  Future<String?> editProfile({
-    required String username,
-    required String name,
-    required String phone,
-    required String staffNumber,
-    required String licenseNumber,
-    required String password,
-  }) async {
-    try {
-      // First verify the user exists
-      final userQuery =
-          await _firestore
-              .collection('users')
-              .where('username', isEqualTo: username)
-              .limit(1)
-              .get();
-
-      if (userQuery.docs.isEmpty) {
-        return 'User not found';
-      }
-
-      final docId = userQuery.docs.first.id;
-
-      // Prepare update data
-      final updateData = {
-        'name': name,
-        'phone': phone,
-        'staffNumber': staffNumber,
-        'licenseNumber': licenseNumber,
-        'password': password,
-        // Add other fields if needed
-      };
-
-      debugPrint("Updating user $docId with data: $updateData");
-
-      // Perform the update
-      await _firestore.collection('users').doc(docId).update(updateData);
-
-      return null;
-    } catch (e) {
-      debugPrint("Error updating profile: $e");
-      return 'Failed to update profile: $e';
-    }
-  }
-
-  // Delete Account
-  Future<String?> deleteAccount({
-    required String email,
-    required BuildContext context,
-  }) async {
-    try {
-      final snapshot =
-          await _firestore
-              .collection('users')
-              .where('username', isEqualTo: email)
-              .limit(1)
-              .get();
-
-      if (snapshot.docs.isEmpty) {
-        return "Account not found";
-      }
-
-      await _firestore.collection('users').doc(snapshot.docs.first.id).delete();
-
-      // Navigation should be handled in the UI layer, but we provide a flag
-      return "success";
-    } catch (e) {
-      debugPrint("Error deleting account: $e");
-      return "Error deleting account: $e";
-    }
-  }
-
-  // Show Success Dialog (UI helper)
-  void showSuccessDialog(BuildContext context) {
+  // Show Generic Success Dialog
+  void showSuccessDialog(BuildContext context, {String title = 'Success!'}) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -307,25 +297,27 @@ class RegisterController {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0)),
           ),
-          title: const Center(
+          title: Center(
             child: Text(
-              'Successfully edited!',
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: 32,
+                fontSize: 24,
               ),
             ),
           ),
           content: const Icon(
             Icons.check_circle,
             color: Colors.green,
-            size: 100,
+            size: 80,
           ),
         );
       },
     );
   }
+
+  // ==================== USER MANAGEMENT ====================
 
   // Get All Users
   Future<List<userModel>> getAllUsers() async {

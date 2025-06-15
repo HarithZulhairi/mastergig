@@ -41,7 +41,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
     setState(() => isLoading = true);
 
     try {
-      final user = await _registerController.getUserByEmail(
+      final user = await _registerController.getUserProfile(
         widget.foremanEmail,
       );
 
@@ -66,28 +66,27 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
     setState(() => isEditing = !isEditing);
   }
 
- // Update the _editProfile method in ForemanProfile
-Future<void> _editProfile() async {
-  final errorMsg = await _registerController.editProfile(
-    username: usernameController.text,
-    name: nameController.text,
-    phone: phoneController.text,
-    staffNumber: staffNumberController.text,
-    licenseNumber: licenseNumberController.text,
-    password: passwordController.text,
-  );
-
-  if (errorMsg == null) {
-    _registerController.showSuccessDialog(context);
-    await _loadForemanProfile(); // Refresh data
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorMsg)),
+  Future<void> _editProfile() async {
+    final errorMsg = await _registerController.updateProfile(
+      email: usernameController.text,
+      name: nameController.text,
+      phone: phoneController.text,
+      staffNumber: staffNumberController.text,
+      licenseNumber: licenseNumberController.text,
+      password: passwordController.text,
     );
+
+    if (errorMsg == null) {
+      _registerController.showSuccessDialog(context);
+      await _loadForemanProfile(); // Refresh data
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMsg)));
+    }
+
+    _toggleEdit();
   }
-  
-  _toggleEdit();
-}
 
   Future<void> _deleteAccount() async {
     final confirm = await showDialog<bool>(
@@ -114,21 +113,18 @@ Future<void> _editProfile() async {
 
     if (confirm != true) return;
 
-    final result = await _registerController.deleteAccount(
-      email: widget.foremanEmail,
-      context: context,
-    );
+    final error = await _registerController.deleteAccount(widget.foremanEmail);
 
-    if (result == "success") {
+    if (error == null && context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const Login()),
         (Route<dynamic> route) => false,
       );
-    } else if (result != null) {
+    } else if (error != null && context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(result)));
+      ).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 

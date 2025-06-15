@@ -68,6 +68,7 @@ BottomNavigationBar foremanFooter(BuildContext context) {
       ),
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       BottomNavigationBarItem(
         icon: Container(
           padding: const EdgeInsets.all(0),
@@ -97,6 +98,8 @@ BottomNavigationBar foremanFooter(BuildContext context) {
         ),
         label: '',
       ),
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======

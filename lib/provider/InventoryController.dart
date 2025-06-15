@@ -6,22 +6,34 @@ class InventoryController {
   final String collectionName = 'inventory';
 
   Future<void> addInventory(Inventory inventory) async {
-  try {
-    final data = inventory.toMap();
-    data['createdAt'] = FieldValue.serverTimestamp();
-    await _firestore.collection(collectionName).add(data);
-  } catch (e) {
-    rethrow;
+    try {
+      final data = inventory.toMap();
+      data['createdAt'] = FieldValue.serverTimestamp();
+      await _firestore.collection(collectionName).add(data);
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
   Future<List<Inventory>> getInventoryList() async {
     try {
-      final snapshot = await _firestore.collection(collectionName).orderBy('createdAt', descending: true).get();
+      final snapshot = await _firestore
+          .collection(collectionName)
+          .orderBy('createdAt', descending: true)
+          .get();
       return snapshot.docs.map((doc) => Inventory.fromMap(doc.data(), doc.id)).toList();
     } catch (e) {
       rethrow;
     }
+  }
+
+  Stream<List<Inventory>> streamInventoryByWorkshop(String workshopName) {
+    return _firestore
+        .collection(collectionName)
+        .where('workshopName', isEqualTo: workshopName)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Inventory.fromMap(doc.data(), doc.id)).toList());
   }
 
   Future<void> deleteInventory(String id) async {
@@ -34,7 +46,9 @@ class InventoryController {
 
   Future<void> updateInventory(String id, Inventory inventory) async {
     try {
-      await _firestore.collection(collectionName).doc(id).update(inventory.toMap());
+      final data = inventory.toMap();
+      data.remove('createdAt');
+      await _firestore.collection(collectionName).doc(id).update(data);
     } catch (e) {
       rethrow;
     }

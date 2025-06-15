@@ -33,7 +33,9 @@ class InventoryPage extends StatelessWidget {
                         final workshopName = snapshot.docs.first['workshopName'] ?? 'Unknown';
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => InventoryRequestPage(workshopName: workshopName)),
+                          MaterialPageRoute(
+                            builder: (_) => InventoryRequestPage(workshopName: workshopName),
+                          ),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,9 +68,16 @@ class InventoryPage extends StatelessWidget {
                           .get();
                       if (snapshot.docs.isNotEmpty) {
                         final workshopName = snapshot.docs.first['workshopName'] ?? 'Unknown';
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => InventoryMyListPage(workshopName: workshopName)));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InventoryMyListPage(workshopName: workshopName),
+                          ),
+                        );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No inventory available to get workshop name")));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("No inventory available to get workshop name")),
+                        );
                       }
                     },
                     style: _buttonStyle(),
@@ -84,11 +93,17 @@ class InventoryPage extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 16),
-          const Text('List of Inventory', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+          const Text(
+            'List of Inventory',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           Expanded(
             child: StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('inventory').orderBy('createdAt', descending: true).snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('inventory')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
@@ -103,7 +118,13 @@ class InventoryPage extends StatelessWidget {
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       child: ListTile(
-                        title: Text(data['inventoryName'] ?? 'No Name'),
+                        title: Text(
+                          data['inventoryName'] ?? 'No Name',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18, // Bigger and bold
+                          ),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -115,16 +136,33 @@ class InventoryPage extends StatelessWidget {
                             Text('Notes: ${data['additionalNotes'] ?? '-'}'),
                           ],
                         ),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => InventoryRequestFormPage(item: docSnapshot),
+                        trailing: SizedBox(
+                          width: 100,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => InventoryRequestFormPage(item: docSnapshot),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(238, 239, 211, 11),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: const BorderSide(
+                                  color: Colors.black,
+                                  width: 0.5,
+                                ),
                               ),
-                            );
-                          },
-                          child: const Text("Request"),
+                            ),
+                            child: const Text(
+                              "Request",
+                              style: TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ),
                         ),
                         isThreeLine: true,
                       ),

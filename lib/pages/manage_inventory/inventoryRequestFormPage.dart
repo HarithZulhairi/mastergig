@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
+import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart'; // Import InventoryPage
 
 class InventoryRequestFormPage extends StatefulWidget {
   final DocumentSnapshot item;
@@ -40,7 +41,10 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
         child: Column(
           children: [
             const Center(
-              child: Text('Request Inventory', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              child: Text(
+                'Request Inventory',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
             ),
             const SizedBox(height: 20),
             _buildLabel('Inventory Name'),
@@ -75,6 +79,7 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
             ),
 
             const SizedBox(height: 30),
+            // Send Request Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -82,21 +87,55 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
                   if (selectedQuantity != null && myWorkshopNameController.text.isNotEmpty) {
                     await sendRequest();
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Request submitted")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Request submitted")),
+                    );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please complete all fields")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please complete all fields")),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
+                  backgroundColor: const Color(0xFFF9BE08),
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    side: const BorderSide(color: Colors.black),
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(color: Colors.black, width: 0.5),
                   ),
                 ),
-                child: const Text('Send Request', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Send Request',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+            // Back Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const InventoryPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF9BE08),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(color: Colors.black, width: 0.5),
+                  ),
+                ),
+                child: const Text(
+                  'Back',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
@@ -108,7 +147,10 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
   Widget _buildLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+      child: Text(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 

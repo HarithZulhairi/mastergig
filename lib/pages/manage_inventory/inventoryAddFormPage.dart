@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
+import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart'; // Make sure this import path is correct
 
 class InventoryAddFormPage extends StatefulWidget {
   const InventoryAddFormPage({super.key});
@@ -90,7 +91,7 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
 
             const SizedBox(height: 30),
 
-            // Updated Styled Button
+            // Add Inventory Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -110,7 +111,7 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                   _clearFields();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(238, 239, 211, 11), // Yellow
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -120,6 +121,34 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 ),
                 child: const Text(
                   'Add Inventory',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // List of Inventory Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const InventoryPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
+                  foregroundColor: const Color.fromARGB(255, 14, 13, 13),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+                child: const Text(
+                  'List of Inventory',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

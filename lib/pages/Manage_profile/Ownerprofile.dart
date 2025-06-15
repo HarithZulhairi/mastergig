@@ -254,7 +254,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                                 controller: nameController,
                                 enabled: isEditing,
                                 style: getTextStyle(),
-                                decoration: getFieldDecoration('Name'),
+                                decoration: getFieldDecoration('Full Name'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(

@@ -1,3 +1,4 @@
+// lib/pages/Register.dart
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
 import 'package:mastergig_app/provider/RegisterController.dart' as provider;
@@ -11,89 +12,17 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
+  final provider.RegisterController _registerController =
+      provider.RegisterController();
 
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController staffNumberController = TextEditingController();
-  final TextEditingController licenseNumberController = TextEditingController();
+  final TextEditingController staffLicenseController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
-
-  final provider.RegisterController _registerController =
-      provider.RegisterController();
 
   String selectedRole = 'Owner';
   bool agreeToTerms = false;
-
-  Future<void> _signUp() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-    final phone = phoneController.text.trim();
-    final staffNumber = staffNumberController.text.trim();
-    final licenseNumber = licenseNumberController.text.trim();
-    final name = nameController.text.trim();
-
-    final errorMessage = await _registerController.signUp(
-      name: name,
-      phone: phone,
-      email: email,
-      password: password,
-      staffNumber: staffNumber,
-      licenseNumber: licenseNumber,
-      role: selectedRole,
-    );
-
-    if (context.mounted) {
-      if (errorMessage == null) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            Future.delayed(const Duration(milliseconds: 1000), () {
-              Navigator.of(context).pop();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const Login()),
-              );
-            });
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              ),
-              title: const Center(
-                child: Text(
-                  'Sign Up Sucessfull!',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 32,
-                  ),
-                ),
-              ),
-              content: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 100,
-              ),
-            );
-          },
-        );
-
-        _formKey.currentState?.reset();
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
-      }
-    }
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return 'Email is required';
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) return 'Enter a valid email';
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,19 +57,18 @@ class _RegisterState extends State<Register> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Name Field
                             TextFormField(
                               controller: nameController,
                               decoration: const InputDecoration(
                                 labelText: "Full Name",
                                 border: OutlineInputBorder(),
                               ),
-                              validator:
-                                  (value) =>
-                                      value == null || value.isEmpty
-                                          ? "Full name is required"
-                                          : null,
+                              validator: _registerController.validateName,
                             ),
                             const SizedBox(height: 15),
+
+                            // Contact Information
                             const Text("Contact Information"),
                             const SizedBox(height: 10),
                             TextFormField(
@@ -150,13 +78,11 @@ class _RegisterState extends State<Register> {
                                 border: OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.phone,
-                              validator:
-                                  (value) =>
-                                      value == null || value.isEmpty
-                                          ? "Phone number is required"
-                                          : null,
+                              validator: _registerController.validatePhone,
                             ),
                             const SizedBox(height: 15),
+
+                            // Email Field
                             TextFormField(
                               controller: emailController,
                               decoration: const InputDecoration(
@@ -164,9 +90,11 @@ class _RegisterState extends State<Register> {
                                 border: OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.emailAddress,
-                              validator: _validateEmail,
+                              validator: _registerController.validateEmail,
                             ),
                             const SizedBox(height: 15),
+
+                            // Password Field
                             TextFormField(
                               controller: passwordController,
                               obscureText: true,
@@ -174,13 +102,11 @@ class _RegisterState extends State<Register> {
                                 labelText: "Password",
                                 border: OutlineInputBorder(),
                               ),
-                              validator:
-                                  (value) =>
-                                      value == null || value.length < 6
-                                          ? "Password must be at least 6 characters"
-                                          : null,
+                              validator: _registerController.validatePassword,
                             ),
                             const SizedBox(height: 15),
+
+                            // Role Dropdown
                             DropdownButtonFormField<String>(
                               value: selectedRole,
                               items: const [
@@ -194,9 +120,7 @@ class _RegisterState extends State<Register> {
                                 ),
                               ],
                               onChanged: (value) {
-                                setState(() {
-                                  selectedRole = value!;
-                                });
+                                setState(() => selectedRole = value!);
                               },
                               decoration: const InputDecoration(
                                 labelText: "Role",
@@ -205,42 +129,32 @@ class _RegisterState extends State<Register> {
                             ),
                             const SizedBox(height: 15),
 
-                            // ✅ Conditional Field
-                            selectedRole == "Owner"
-                                ? TextFormField(
-                                  controller: licenseNumberController,
-                                  decoration: const InputDecoration(
-                                    labelText: "License Number",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  validator:
-                                      (value) =>
-                                          value == null || value.isEmpty
-                                              ? "License number is required"
-                                              : null,
-                                )
-                                : TextFormField(
-                                  controller: staffNumberController,
-                                  decoration: const InputDecoration(
-                                    labelText: "Staff Number",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  validator:
-                                      (value) =>
-                                          value == null || value.isEmpty
-                                              ? "Staff number is required"
-                                              : null,
-                                ),
+                            // Conditional Field
+                            TextFormField(
+                              controller: staffLicenseController,
+                              decoration: InputDecoration(
+                                labelText:
+                                    selectedRole == "Owner"
+                                        ? "License Number"
+                                        : "Staff Number",
+                                border: const OutlineInputBorder(),
+                              ),
+                              validator:
+                                  (value) => _registerController
+                                      .validateStaffLicenseNumber(
+                                        value,
+                                        selectedRole,
+                                      ),
+                            ),
                             const SizedBox(height: 15),
 
+                            // Terms Checkbox
                             Row(
                               children: [
                                 Checkbox(
                                   value: agreeToTerms,
                                   onChanged: (value) {
-                                    setState(() {
-                                      agreeToTerms = value!;
-                                    });
+                                    setState(() => agreeToTerms = value!);
                                   },
                                 ),
                                 const Expanded(
@@ -251,6 +165,8 @@ class _RegisterState extends State<Register> {
                               ],
                             ),
                             const SizedBox(height: 10),
+
+                            // Sign Up Button
                             SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -258,20 +174,7 @@ class _RegisterState extends State<Register> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFD8BB3B),
                                 ),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate() &&
-                                      agreeToTerms) {
-                                    _signUp();
-                                  } else if (!agreeToTerms) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "You must agree to the terms.",
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
+                                onPressed: _handleSignUp,
                                 child: const Text(
                                   "Sign Up",
                                   style: TextStyle(
@@ -294,5 +197,44 @@ class _RegisterState extends State<Register> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleSignUp() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (!agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("You must agree to the terms.")),
+      );
+      return;
+    }
+
+    final error = await _registerController.signUp(
+      name: nameController.text.trim(),
+      phone: phoneController.text.trim(),
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+      staffNumber:
+          selectedRole == 'Foreman' ? staffLicenseController.text.trim() : '',
+      licenseNumber:
+          selectedRole == 'Owner' ? staffLicenseController.text.trim() : '',
+      role: selectedRole,
+      context: context,
+    );
+
+    if (error != null && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    staffLicenseController.dispose();
+    nameController.dispose();
+    super.dispose();
   }
 }

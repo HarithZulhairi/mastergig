@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/pages/ForemanProfile.dart
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/domain/LoginAndProfile/userModel.dart';
 import 'package:mastergig_app/pages/Manage_login/Login.dart';
@@ -29,42 +29,25 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  final RegisterController _registerController = RegisterController();
+
   @override
   void initState() {
     super.initState();
-    loadForemanProfile();
+    _loadForemanProfile();
   }
 
-  Future<void> loadForemanProfile() async {
-    final email = widget.foremanEmail;
-
-    if (email.isEmpty) {
-      setState(() => isLoading = false);
-      return;
-    }
+  Future<void> _loadForemanProfile() async {
+    setState(() => isLoading = true);
 
     try {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('username', isEqualTo: email)
-              .limit(1)
-              .get();
+      final user = await _registerController.getUserByEmail(
+        widget.foremanEmail,
+      );
 
-      if (snapshot.docs.isNotEmpty) {
-        final data = snapshot.docs.first.data();
-
+      if (user != null) {
         setState(() {
-          foreman = userModel(
-            name: data['name'] ?? '',
-            username: data['username'] ?? '',
-            phone: data['phone'] ?? '',
-            password: data['password'] ?? '',
-            staffNumber: data['staffNumber'] ?? '',
-            licenseNumber: data['licenseNumber'] ?? '',
-            role: data['role'] ?? '',
-          );
-
+          foreman = user;
           nameController.text = foreman!.name;
           usernameController.text = foreman!.username;
           phoneController.text = foreman!.phone;
@@ -73,104 +56,40 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
           roleController.text = foreman!.role;
           passwordController.text = foreman!.password;
         });
-      } else {
-        debugPrint("No foreman found for email: $email");
       }
-    } catch (e) {
-      debugPrint("Error retrieving foreman data: $e");
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void toggleEdit() {
-    setState(() {
-      isEditing = !isEditing;
-    });
+  void _toggleEdit() {
+    setState(() => isEditing = !isEditing);
   }
 
-  Future<void> editProfile() async {
-    final errorMsg = await RegisterController().editProfile(
-      username: usernameController.text,
-      phone: phoneController.text,
-      staffNumber: staffNumberController.text,
-      licenseNumber: licenseNumberController.text,
+ // Update the _editProfile method in ForemanProfile
+Future<void> _editProfile() async {
+  final errorMsg = await _registerController.editProfile(
+    username: usernameController.text,
+    name: nameController.text,
+    phone: phoneController.text,
+    staffNumber: staffNumberController.text,
+    licenseNumber: licenseNumberController.text,
+    password: passwordController.text,
+  );
+
+  if (errorMsg == null) {
+    _registerController.showSuccessDialog(context);
+    await _loadForemanProfile(); // Refresh data
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorMsg)),
     );
-
-    if (errorMsg == null) {
-      try {
-        final snapshot =
-            await FirebaseFirestore.instance
-                .collection('users')
-                .where('username', isEqualTo: widget.foremanEmail)
-                .limit(1)
-                .get();
-
-        if (snapshot.docs.isNotEmpty) {
-          final docId = snapshot.docs.first.id;
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(docId)
-              .update({
-                'name': nameController.text,
-                'username': usernameController.text,
-                'phone': phoneController.text,
-                'staffNumber': staffNumberController.text,
-                'licenseNumber': licenseNumberController.text,
-                'password': passwordController.text,
-                'role': roleController.text,
-              });
-
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              Future.delayed(const Duration(milliseconds: 1000), () {
-                Navigator.of(context).pop();
-              });
-              return AlertDialog(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-                title: const Center(
-                  child: Text(
-                    'Successfully edited!',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32,
-                    ),
-                  ),
-                ),
-                content: const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 100,
-                ),
-              );
-            },
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User not found in database")),
-          );
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error updating Firestore: $e")));
-      }
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMsg)));
-    }
-
-    toggleEdit();
   }
+  
+  _toggleEdit();
+}
 
-  Future<void> deleteAccount() async {
+  Future<void> _deleteAccount() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder:
@@ -195,39 +114,21 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
 
     if (confirm != true) return;
 
-    try {
-      final snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .where('username', isEqualTo: widget.foremanEmail)
-              .limit(1)
-              .get();
+    final result = await _registerController.deleteAccount(
+      email: widget.foremanEmail,
+      context: context,
+    );
 
-      if (snapshot.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(snapshot.docs.first.id)
-            .delete();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account deleted successfully")),
-        );
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const Login()),
-          (Route<dynamic> route) => false,
-        );
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Account not found")));
-      }
-    } catch (e) {
-      debugPrint("Error deleting account: $e");
+    if (result == "success") {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Login()),
+        (Route<dynamic> route) => false,
+      );
+    } else if (result != null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error deleting account: $e")));
+      ).showSnackBar(SnackBar(content: Text(result)));
     }
   }
 
@@ -243,7 +144,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
     super.dispose();
   }
 
-  InputDecoration getFieldDecoration(String label) {
+  InputDecoration _getFieldDecoration(String label) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(
@@ -256,7 +157,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
     );
   }
 
-  TextStyle getTextStyle() {
+  TextStyle _getTextStyle() {
     return const TextStyle(color: Colors.black, fontWeight: FontWeight.bold);
   }
 
@@ -296,23 +197,25 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
                               TextFormField(
                                 controller: nameController,
                                 enabled: isEditing,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Name'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration('Name'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: usernameController,
                                 enabled: isEditing,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Email Address'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
+                                  'Email Address',
+                                ),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: phoneController,
                                 enabled: isEditing,
                                 keyboardType: TextInputType.phone,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration(
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
                                   'Contact Information',
                                 ),
                               ),
@@ -320,23 +223,23 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
                               TextFormField(
                                 controller: staffNumberController,
                                 enabled: isEditing,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Staff Number'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration('Staff Number'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: roleController,
                                 enabled: false,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration('Role'),
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration('Role'),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: passwordController,
                                 enabled: isEditing,
                                 obscureText: !_showPassword,
-                                style: getTextStyle(),
-                                decoration: getFieldDecoration(
+                                style: _getTextStyle(),
+                                decoration: _getFieldDecoration(
                                   'Password',
                                 ).copyWith(
                                   suffixIcon: IconButton(
@@ -362,7 +265,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
                           children: [
                             ElevatedButton.icon(
                               onPressed: () {
-                                isEditing ? editProfile() : toggleEdit();
+                                isEditing ? _editProfile() : _toggleEdit();
                               },
                               icon: Icon(
                                 isEditing ? Icons.save : Icons.edit,
@@ -384,7 +287,7 @@ class _ForemanProfilePageState extends State<ForemanProfile> {
                             ),
                             const SizedBox(width: 12),
                             ElevatedButton.icon(
-                              onPressed: deleteAccount,
+                              onPressed: _deleteAccount,
                               icon: const Icon(
                                 Icons.delete,
                                 color: Colors.black,

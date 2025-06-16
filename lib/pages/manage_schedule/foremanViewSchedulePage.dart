@@ -57,80 +57,83 @@ class ForemanViewSchedulePage extends StatelessWidget {
                   )),
                 
                 const SizedBox(height: 30),
-                
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ForemanSelectSchedulePage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF9BE08),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: const BorderSide(
-                                color: Colors.black,
-                                width: 0.5,
-                              ),
-                            ),
-                          ),
-                          child: const Text(
-                            'Select New Schedule',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Opacity(
-                          opacity: 0.5,
-                          child: ElevatedButton(
-                            onPressed: null, // Disabled
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xEEEFD30B),
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side: const BorderSide(
-                                  color: Colors.black,
-                                  width: 0.5,
-                                ),
-                              ),
-                            ),
-                            child: const Text(
-                              'View My Schedules',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
               ],
             ),
           );
         },
       ),
-      bottomNavigationBar: foremanFooter(context),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ForemanSelectSchedulePage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Select New Schedule',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: ElevatedButton(
+                      onPressed: null, // Disabled
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xEEEFD30B),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: const BorderSide(
+                            color: Colors.black,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'View My Schedules',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          foremanFooter(context),
+        ],
+      ),
     );
   }
 

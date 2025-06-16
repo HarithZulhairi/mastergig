@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingViewPage.dart';
+import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/domain/Rating/Rating.dart';
@@ -92,31 +93,19 @@ class _ownerRatingEditFormPageState extends State<ownerRatingEditFormPage> {
 
     await _ratingController.updateRating(updatedRating); // <-- Add await here
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        Future.delayed(const Duration(seconds: 1), () {
-          Navigator.of(context).pop();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ownerRatingViewPage(rating: updatedRating),
-            ),
-          );
-        });
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          title: const Center(
-            child: Text(
-              'Updated!',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-          ),
-          content: const Icon(Icons.check_circle, color: Colors.green, size: 100),
-        );
-      },
-    );
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rating updated successfully!')),
+      );
+
+    // Navigate back to view page after successful update
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ownerRatingPage(),
+        ),
+      );  
+
+
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -222,7 +211,7 @@ class _ownerRatingEditFormPageState extends State<ownerRatingEditFormPage> {
                         child: _isSubmitting
                             ? const CircularProgressIndicator()
                             : const Text(
-                                'Update',
+                                'Edit',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 18,
@@ -234,6 +223,45 @@ class _ownerRatingEditFormPageState extends State<ownerRatingEditFormPage> {
                   ],
                 ),
               ),
+            ),
+
+
+            const SizedBox(height: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ownerRatingPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

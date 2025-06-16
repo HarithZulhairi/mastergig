@@ -36,44 +36,18 @@ class _InventoryEditFormPageState extends State<InventoryEditFormPage> {
   String selectedCategory = '';
   final InventoryController _controller = InventoryController();
 
-  late String docId;
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    docId = widget.item.id;
-
     nameCtrl = TextEditingController(text: widget.item.inventoryName);
     qtyCtrl = TextEditingController(text: widget.item.quantity.toString());
     priceCtrl = TextEditingController(text: widget.item.unitPrice.toString());
     noteCtrl = TextEditingController(text: widget.item.additionalNotes);
-    selectedCategory = widget.item.category;
     workshopAddressCtrl = TextEditingController(text: widget.item.workshopAddress);
     workshopNameCtrl = TextEditingController(text: widget.item.workshopName);
-  }
-
-  Future<void> _submitForm() async {
-    setState(() => _isSubmitting = true);
-
-    final inventory = Inventory(
-      id: docId,
-      inventoryName: nameCtrl.text,
-      quantity: int.tryParse(qtyCtrl.text) ?? 0,
-      unitPrice: double.tryParse(priceCtrl.text) ?? 0.0,
-      additionalNotes: noteCtrl.text,
-      category: selectedCategory,
-      workshopAddress: workshopAddressCtrl.text,
-      workshopName: workshopNameCtrl.text,
-      createdAt: widget.item.createdAt, // retain original creation date
-    );
-
-    await _controller.updateInventory(docId, inventory);
-
-    if (mounted) {
-      setState(() => _isSubmitting = false);
-      Navigator.pop(context);
-    }
+    selectedCategory = widget.item.category;
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
@@ -113,19 +87,11 @@ class _InventoryEditFormPageState extends State<InventoryEditFormPage> {
             Row(
               children: [
                 Expanded(
-                  child: _buildTextField(
-                    qtyCtrl,
-                    'Quantity',
-                    keyboardType: TextInputType.number,
-                  ),
+                  child: _buildTextField(qtyCtrl, 'Quantity', keyboardType: TextInputType.number),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _buildTextField(
-                    priceCtrl,
-                    'Unit Price (RM)',
-                    keyboardType: TextInputType.number,
-                  ),
+                  child: _buildTextField(priceCtrl, 'Unit Price (RM)', keyboardType: TextInputType.number),
                 ),
               ],
             ),
@@ -147,16 +113,32 @@ class _InventoryEditFormPageState extends State<InventoryEditFormPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitForm,
+                onPressed: _isSubmitting
+                    ? null
+                    : () async {
+                        setState(() => _isSubmitting = true);
+                        await _controller.handleUpdateInventory(
+                          context: context,
+                          item: widget.item,
+                          inventoryName: nameCtrl.text,
+                          workshopName: workshopNameCtrl.text,
+                          workshopAddress: workshopAddressCtrl.text,
+                          quantityText: qtyCtrl.text,
+                          unitPriceText: priceCtrl.text,
+                          additionalNotes: noteCtrl.text,
+                          category: selectedCategory,
+                        );
+                        if (mounted) {
+                          setState(() => _isSubmitting = false);
+                          Navigator.pop(context);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF9BE08),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(
-                      color: Colors.black,
-                      width: 0.5,
-                    ),
+                    side: const BorderSide(color: Colors.black, width: 0.5),
                   ),
                 ),
                 child: const Text(
@@ -165,7 +147,6 @@ class _InventoryEditFormPageState extends State<InventoryEditFormPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 15),
 
             // Back Button
@@ -187,10 +168,7 @@ class _InventoryEditFormPageState extends State<InventoryEditFormPage> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(
-                      color: Colors.black,
-                      width: 0.5,
-                    ),
+                    side: const BorderSide(color: Colors.black, width: 0.5),
                   ),
                 ),
                 child: const Text(

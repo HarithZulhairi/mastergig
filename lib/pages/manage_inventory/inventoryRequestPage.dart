@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
+import 'package:mastergig_app/provider/InventoryController.dart';
 
 class InventoryRequestPage extends StatefulWidget {
   final String workshopName;
@@ -15,6 +17,7 @@ class InventoryRequestPage extends StatefulWidget {
 
 class _InventoryRequestPageState extends State<InventoryRequestPage> {
   String viewMode = 'Requested To Me';
+  final InventoryController controller = Get.put(InventoryController());
 
   @override
   Widget build(BuildContext context) {
@@ -56,16 +59,7 @@ class _InventoryRequestPageState extends State<InventoryRequestPage> {
           const SizedBox(height: 10),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: viewMode == 'Requested To Me'
-                  ? FirebaseFirestore.instance
-                      .collection('inventory_requests')
-                      .where('toWorkshop', isEqualTo: widget.workshopName)
-                      .where('status', isEqualTo: 'Pending')
-                      .snapshots()
-                  : FirebaseFirestore.instance
-                      .collection('inventory_requests')
-                      .where('fromWorkshop', isEqualTo: widget.workshopName)
-                      .snapshots(),
+              stream: controller.getRequestStream(widget.workshopName, viewMode),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
@@ -115,12 +109,7 @@ class _InventoryRequestPageState extends State<InventoryRequestPage> {
                                           Column(
                                             children: [
                                               ElevatedButton(
-                                                onPressed: () async {
-                                                  await item.reference.update({'status': 'Accepted'});
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('Request accepted')),
-                                                  );
-                                                },
+                                                onPressed: () => controller.acceptRequest(item.id),
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: const Color(0xFFFFEB3B),
                                                   foregroundColor: Colors.black,
@@ -134,12 +123,7 @@ class _InventoryRequestPageState extends State<InventoryRequestPage> {
                                               ),
                                               const SizedBox(height: 8),
                                               ElevatedButton(
-                                                onPressed: () async {
-                                                  await item.reference.update({'status': 'Cancelled'});
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('Request cancelled')),
-                                                  );
-                                                },
+                                                onPressed: () => controller.cancelRequest(item.id),
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: const Color(0xFFFFC107),
                                                   foregroundColor: Colors.black,

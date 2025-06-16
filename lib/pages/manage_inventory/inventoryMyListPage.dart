@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart';
 
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
@@ -13,81 +13,6 @@ class InventoryMyListPage extends StatelessWidget {
   final InventoryController _controller = InventoryController();
 
   InventoryMyListPage({super.key, required this.workshopName});
-
-  void _showDeleteConfirmationDialog(BuildContext context, Inventory item) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              'Confirm Delete',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-            ),
-          ),
-          content: const Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Text(
-              'Are you sure you want to delete this inventory?',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-          actionsPadding: const EdgeInsets.only(bottom: 20),
-          actions: [
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF7878),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                      ),
-                      child: const Text('No', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await _controller.deleteInventory(item.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Item deleted')),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1EEF0B),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                      ),
-                      child: const Text('Yes', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +51,8 @@ class InventoryMyListPage extends StatelessWidget {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = items[index];
-                    final String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(item.createdAt);
+                    final String formattedDate =
+                        DateFormat('yyyy-MM-dd HH:mm').format(item.createdAt);
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -140,7 +66,8 @@ class InventoryMyListPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(item.inventoryName,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold, fontSize: 16)),
                                   const SizedBox(height: 4),
                                   Text('Category: ${item.category}'),
                                   Text('Quantity: ${item.quantity}'),
@@ -175,7 +102,7 @@ class InventoryMyListPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 ElevatedButton(
-                                  onPressed: () => _showDeleteConfirmationDialog(context, item),
+                                  onPressed: () => _controller.showDeleteConfirmationDialog(context, item),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFFFC107),
                                     foregroundColor: Colors.black,

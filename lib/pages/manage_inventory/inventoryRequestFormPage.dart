@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
-import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart'; // Import InventoryPage
+import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
+import 'package:mastergig_app/provider/InventoryController.dart';
 
 class InventoryRequestFormPage extends StatefulWidget {
   final DocumentSnapshot item;
@@ -13,20 +14,9 @@ class InventoryRequestFormPage extends StatefulWidget {
 }
 
 class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
+  final InventoryController controller = InventoryController();
   final TextEditingController myWorkshopNameController = TextEditingController();
   String? selectedQuantity;
-
-  Future<void> sendRequest() async {
-    await FirebaseFirestore.instance.collection('inventory_requests').add({
-      'itemId': widget.item.id,
-      'itemName': widget.item['inventoryName'],
-      'toWorkshop': widget.item['workshopName'],
-      'fromWorkshop': myWorkshopNameController.text,
-      'quantity': int.parse(selectedQuantity ?? '1'),
-      'status': 'Pending',
-      'timestamp': Timestamp.now(),
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +75,13 @@ class _InventoryRequestFormPageState extends State<InventoryRequestFormPage> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (selectedQuantity != null && myWorkshopNameController.text.isNotEmpty) {
-                    await sendRequest();
+                    await controller.sendInventoryRequest(
+                      itemId: widget.item.id,
+                      itemName: data['inventoryName'] ?? 'N/A',
+                      toWorkshop: data['workshopName'] ?? 'N/A',
+                      fromWorkshop: myWorkshopNameController.text,
+                      quantity: int.parse(selectedQuantity!),
+                    );
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Request submitted")),

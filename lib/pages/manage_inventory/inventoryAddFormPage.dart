@@ -4,7 +4,6 @@ import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
 import 'package:mastergig_app/provider/InventoryController.dart';
-import 'package:mastergig_app/domain/Inventory/Inventory.dart';
 
 class InventoryAddFormPage extends StatefulWidget {
   const InventoryAddFormPage({super.key});
@@ -78,9 +77,7 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
             _buildTextField(additionalNotesController, 'Additional Notes'),
             DropdownButtonFormField<String>(
               value: selectedCategory.isEmpty ? null : selectedCategory,
-              items: categories
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
+              items: categories.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: (value) => setState(() => selectedCategory = value ?? ''),
               decoration: const InputDecoration(
                 labelText: 'Category',
@@ -94,23 +91,17 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  try {
-                    final inventory = Inventory(
-                      workshopName: workshopNameController.text,
-                      inventoryName: inventoryNameController.text,
-                      workshopAddress: workshopAddressController.text,
-                      quantity: int.tryParse(quantityController.text) ?? 0,
-                      unitPrice: double.tryParse(unitPriceController.text) ?? 0.0,
-                      additionalNotes: additionalNotesController.text,
-                      category: selectedCategory,
-                    );
-
-                    await _controller.addInventory(inventory);
-                    Get.snackbar('Success', 'Inventory added!');
-                    _clearFields();
-                  } catch (e) {
-                    Get.snackbar('Error', 'Failed to add inventory');
-                  }
+                  await _controller.handleAddInventory(
+                    context: context,
+                    workshopName: workshopNameController.text,
+                    inventoryName: inventoryNameController.text,
+                    workshopAddress: workshopAddressController.text,
+                    quantityText: quantityController.text,
+                    unitPriceText: unitPriceController.text,
+                    additionalNotes: additionalNotesController.text,
+                    category: selectedCategory,
+                  );
+                  _clearFields();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(238, 239, 211, 11),

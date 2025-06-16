@@ -5,6 +5,7 @@ import 'package:mastergig_app/widgets/foremanHeader.dart';
 import 'package:mastergig_app/widgets/foremanFooter.dart';
 import 'package:mastergig_app/domain/Rating/Rating.dart';
 import 'package:mastergig_app/provider/RatingController.dart';
+import 'package:mastergig_app/pages/manage_rating/foremanRatingPage.dart';
 
 class foremanRatingAddFormPage extends StatefulWidget {
   const foremanRatingAddFormPage({super.key});
@@ -230,6 +231,43 @@ class _foremanRatingAddFormPageState extends State<foremanRatingAddFormPage> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => foremanRatingPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

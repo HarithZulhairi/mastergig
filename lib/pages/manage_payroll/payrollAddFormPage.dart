@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mastergig_app/domain/Payroll/Payment.dart';
 import 'package:mastergig_app/provider/PayrollController.dart';
+import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 
@@ -217,7 +218,7 @@ class _payrollAddFormPageState extends State<payrollAddFormPage> {
                         child: _isSubmitting
                             ? const CircularProgressIndicator()
                             : const Text(
-                                'Submit Payroll',
+                                'Submit',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 18,
@@ -229,6 +230,43 @@ class _payrollAddFormPageState extends State<payrollAddFormPage> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ownerPayrollPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mastergig_app/domain/Payroll/Payment.dart';
+import 'package:mastergig_app/widgets/ownerHeader.dart';
+import 'package:mastergig_app/widgets/ownerFooter.dart';
+import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart';
 import 'package:mastergig_app/services/stripe_service.dart';
 
 class payrollViewPage extends StatelessWidget {
@@ -16,22 +19,18 @@ class payrollViewPage extends StatelessWidget {
     final formattedTotalPay = NumberFormat.currency(symbol: 'RM ', decimalDigits: 2).format(payment.totalPay);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(payment.name),
-        backgroundColor: const Color(0xFFFFF18E),
-        foregroundColor: Colors.black,
-      ),
+      appBar: ownerHeader(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Payroll Details',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
 
@@ -60,31 +59,46 @@ class payrollViewPage extends StatelessWidget {
 
             // Buttons Row
             const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
               children: [
+                Expanded(
                 // Back Button
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                child: ElevatedButton(
+                  onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ownerPayrollPage(),
+                              ),
+                            );
+                          },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    backgroundColor: const Color(0xFFF9BE08),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 0.5,
+                              ),
                     ),
                   ),
                   child: const Text(
                     'Back',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
+                      fontSize: 16,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
+                ), //ElevatedButton
+                ), //Expanded
+                const SizedBox(width: 10),
                 // Pay Button
-                ElevatedButton(
+                Expanded(
+                  child: ElevatedButton(
                   onPressed: () async {
     try {
       // Show loading
@@ -124,27 +138,35 @@ class payrollViewPage extends StatelessWidget {
     }
   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    backgroundColor: const Color(0xEEEFD30B),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
+                                side: const BorderSide(
+                                  color: Colors.black,
+                                  width: 0.5,
+                                ),
                     ),
                   ),
                   
                   child: const Text(
                     'Pay',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
+                      fontSize: 16,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ),
               ],
             ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
+      bottomNavigationBar: ownerFooter(context),
     );
   }
 

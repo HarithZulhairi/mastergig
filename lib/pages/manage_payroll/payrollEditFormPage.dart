@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mastergig_app/domain/Payroll/Payment.dart';
 import 'package:mastergig_app/provider/PayrollController.dart';
+import 'package:mastergig_app/pages/manage_payroll/payrollPage.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 
@@ -91,26 +92,18 @@ class _payrollEditFormPageState extends State<payrollEditFormPage> {
 
       await _payrollController.updatePayroll(widget.payment.id, updatedPayment);
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          Future.delayed(const Duration(seconds: 1), () {
-            Navigator.of(context).pop(); // Close dialog
-            Navigator.of(context).pop(); // Go back
-          });
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            title: const Center(
-              child: Text(
-                'Payroll Updated!',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-            ),
-            content: const Icon(Icons.check_circle, color: Colors.green, size: 100),
-          );
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payroll updated successfully!')),
       );
+
+      // Navigate back to view page after successful update
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ownerPayrollPage(),
+        ),
+      );
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -221,7 +214,7 @@ class _payrollEditFormPageState extends State<payrollEditFormPage> {
                         child: _isSubmitting
                             ? const CircularProgressIndicator()
                             : const Text(
-                                'Update Payroll',
+                                'Edit',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 18,
@@ -233,6 +226,43 @@ class _payrollEditFormPageState extends State<payrollEditFormPage> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ownerPayrollPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

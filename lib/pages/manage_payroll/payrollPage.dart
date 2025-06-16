@@ -41,58 +41,64 @@ String _formatTimeOfDay(TimeOfDay time) {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
                     const Text(
                       'Payroll',
                       style: TextStyle(
-                        fontSize: 27,
+                        fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => payrollAddFormPage(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEFD30B),
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(
-                            color: Colors.black,
-                            width: 0.5,
+                    const SizedBox(height: 20),
+
+                    if (payments.isEmpty)
+                      const Text('No payments available')
+                    else
+                      ...payments.map((payment) => _buildPaymentCard(context, payment)),
+
+                  const SizedBox(height: 30),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => payrollAddFormPage(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFF9BE08),
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: const BorderSide(
+                                  color: Colors.black,
+                                  width: 0.5,
+                                ),
+                              ),
+                            ),
+                            child: const Text(
+                              'Add Payroll',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        'Add Payroll',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                        const SizedBox(width: 10),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                if (payments.isEmpty)
-                  const Text('No payments available')
-                else
-                  ...payments.map((payment) => _buildPaymentCard(context, payment)),
-
-                const SizedBox(height: 30),
-              ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
             ),
           );
         },
@@ -163,10 +169,10 @@ String _formatTimeOfDay(TimeOfDay time) {
         ],
       ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Center(
+              child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -177,10 +183,10 @@ String _formatTimeOfDay(TimeOfDay time) {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    backgroundColor: const Color(0xFFEFD30B),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       side: const BorderSide(
                         color: Colors.black,
                         width: 0.5,
@@ -190,13 +196,13 @@ String _formatTimeOfDay(TimeOfDay time) {
                   child: const Text(
                     'Edit',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 18,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 30),
                 ElevatedButton(
       onPressed: () async {
         // Show confirmation dialog
@@ -220,7 +226,7 @@ String _formatTimeOfDay(TimeOfDay time) {
                     Text(
                       'Are you sure you want to delete ${payment.name}\'s payroll?',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black.withOpacity(0.8),
                       ),
@@ -338,10 +344,10 @@ await FirebaseFirestore.instance
         }
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        backgroundColor: const Color(0xFFF9BE08),
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           side: const BorderSide(
             color: Colors.black,
             width: 0.5,
@@ -351,13 +357,14 @@ await FirebaseFirestore.instance
       child: const Text(
         'Delete',
         style: TextStyle(
-          color: Colors.white,
+          color: Colors.black,
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontSize: 18,
         ),
       ),
     ),
               ],
+              ),
             ),
           ],
         ),

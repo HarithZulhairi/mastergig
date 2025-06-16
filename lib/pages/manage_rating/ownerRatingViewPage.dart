@@ -3,7 +3,6 @@ import 'package:mastergig_app/domain/Rating/Rating.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
-
 import 'package:intl/intl.dart';
 
 class ownerRatingViewPage extends StatelessWidget {

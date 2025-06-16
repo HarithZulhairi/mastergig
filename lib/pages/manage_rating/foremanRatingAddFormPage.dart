@@ -173,8 +173,8 @@ class _foremanRatingAddFormPageState extends State<foremanRatingAddFormPage> {
                     const SizedBox(height: 15),
                     _buildTextField(
                       label: 'Role',
-                    controller: _roleController..text = 'Owner',
-                    hint: 'Owner',
+                    controller: _roleController..text = 'Foreman',
+                    hint: 'Foreman',
                     validator: null,
                     readOnly: true,
                     ),

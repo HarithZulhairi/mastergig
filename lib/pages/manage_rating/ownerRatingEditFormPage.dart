@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mastergig_app/pages/manage_rating/ownerRatingViewPage.dart';
 import 'package:mastergig_app/pages/manage_rating/ownerRatingPage.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';

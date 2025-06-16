@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mastergig_app/domain/Rating/Rating.dart';
+import 'package:mastergig_app/widgets/foremanHeader.dart';
+import 'package:mastergig_app/widgets/foremanFooter.dart';
+import 'package:mastergig_app/pages/manage_rating/foremanRatingPage.dart';
 import 'package:intl/intl.dart';
 
 class foremanRatingViewPage extends StatelessWidget {
@@ -10,23 +13,19 @@ class foremanRatingViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(rating.name),
-        backgroundColor: const Color(0xFFEFD30B),
-        foregroundColor: Colors.black,
-      ),
+      appBar: foremanHeader(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title above the card
             const Text(
-              'Foreman Details',
+              'Workshop Details',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
 
@@ -96,26 +95,42 @@ class foremanRatingViewPage extends StatelessWidget {
             ),
 
             // Back Button
-            const SizedBox(height: 40),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min, 
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => foremanRatingPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF9BE08),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(
+                          color: Colors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Back',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              ],
             ),
           ],
         ),

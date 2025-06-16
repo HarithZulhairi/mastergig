@@ -35,49 +35,14 @@ class foremanRatingPage extends StatelessWidget {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
+                const Text(
                       'Rate Workshop',
                       style: TextStyle(
-                        fontSize: 27,
+                        fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => foremanRatingAddFormPage(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEFD30B),
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(
-                            color: Colors.black,
-                            width: 0.5,
-                          ),
-                        ),
-                      ),
-                      child: const Text(
-                        'Add Rating',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 20),
 
                 if (ratings.isEmpty)
@@ -85,7 +50,48 @@ class foremanRatingPage extends StatelessWidget {
                 else
                   ...ratings.map((rating) => _buildRatingCard(context, rating)),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
+
+                  Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const foremanRatingAddFormPage(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF9BE08),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: const Text(
+                            'Add Rating',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           );
@@ -145,8 +151,9 @@ class foremanRatingPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Center(
+              child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -158,10 +165,10 @@ class foremanRatingPage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    backgroundColor: const Color(0xFFEFD30B),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       side: const BorderSide(
                         color: Colors.black,
                         width: 0.5,
@@ -171,9 +178,9 @@ class foremanRatingPage extends StatelessWidget {
                   child: const Text(
                     'Edit',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -201,7 +208,7 @@ class foremanRatingPage extends StatelessWidget {
                               Text(
                                 'Are you sure you want to delete ${rating.workshopName}\'s rating?',
                                 style: TextStyle(
-                                  fontSize: 32,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black.withOpacity(0.8),
                                 ),
@@ -317,10 +324,10 @@ class foremanRatingPage extends StatelessWidget {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  backgroundColor: const Color(0xFFF9BE08),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                     side: const BorderSide(
                       color: Colors.black,
                       width: 0.5,
@@ -330,14 +337,15 @@ class foremanRatingPage extends StatelessWidget {
                 child: const Text(
                   'Delete',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 18,
                   ),
                 ),
               ),
               ],
-            ),
+              ),
+            ), //
           ],
         ),
       ),

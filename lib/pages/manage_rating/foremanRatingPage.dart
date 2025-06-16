@@ -144,7 +144,7 @@ class foremanRatingPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Work Date: ${rating.workDate}',
+              'Work Date: ${rating.formattedDate}',
               style: const TextStyle(
                 fontSize: 20,
                 color: Color(0xEE959595),

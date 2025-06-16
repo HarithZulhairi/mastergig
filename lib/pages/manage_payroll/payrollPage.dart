@@ -152,7 +152,7 @@ String _formatTimeOfDay(TimeOfDay time) {
             Row(
         children: [
           Text(
-            'Work Date: ${payment.workDate}',
+            'Work Date: ${payment.formattedDate}',
             style: const TextStyle(
               fontSize: 20,
               color: Color(0xEE959595),

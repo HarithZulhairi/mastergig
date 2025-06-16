@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
-import 'inventoryEditFormPage.dart';
+import 'package:mastergig_app/pages/manage_inventory/inventoryEditFormPage.dart';
+import 'package:mastergig_app/provider/InventoryController.dart';
+import 'package:mastergig_app/domain/Inventory/Inventory.dart';
 
 class InventoryMyListPage extends StatelessWidget {
   final String workshopName;
+  final InventoryController _controller = InventoryController();
 
-  const InventoryMyListPage({super.key, required this.workshopName});
+  InventoryMyListPage({super.key, required this.workshopName});
 
   @override
   Widget build(BuildContext context) {
@@ -25,90 +30,91 @@ class InventoryMyListPage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('inventory')
-                  .where('workshopName', isEqualTo: workshopName)
-                  .snapshots(),
+            child: StreamBuilder<List<Inventory>>(
+              stream: _controller.streamInventoryByWorkshop(workshopName),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
 
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                final docs = snapshot.data!.docs;
-                if (docs.isEmpty) return const Center(child: Text('No inventory found for this workshop.'));
+                final items = snapshot.data!;
+                if (items.isEmpty) {
+                  return const Center(child: Text('No inventory found for this workshop.'));
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(10),
-                  itemCount: docs.length,
+                  itemCount: items.length,
                   itemBuilder: (context, index) {
-                    final item = docs[index];
-                    final data = item.data() as Map<String, dynamic>;
+                    final item = items[index];
+                    final String formattedDate =
+                        DateFormat('yyyy-MM-dd HH:mm').format(item.createdAt);
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        title: Text(
-                          data['inventoryName'] ?? 'No Name',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Category: ${data['category'] ?? '-'}'),
-                            Text('Quantity: ${data['quantity'] ?? '-'}'),
-                            Text('Unit Price: RM${data['unitPrice'] ?? '-'}'),
-                            Text('Notes: ${data['additionalNotes'] ?? '-'}'),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => InventoryEditFormPage(item: item),
-                                  ),
-                                );
-                              },
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.inventoryName,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 4),
+                                  Text('Category: ${item.category}'),
+                                  Text('Quantity: ${item.quantity}'),
+                                  Text('Unit Price: RM${item.unitPrice.toStringAsFixed(2)}'),
+                                  Text('Notes: ${item.additionalNotes}'),
+                                  Text('Added On: $formattedDate'),
+                                ],
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Confirm Delete'),
-                                      content: const Text('Are you sure you want to delete this inventory?'),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text('Cancel'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop(); // Close the dialog
-                                          },
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                          child: const Text('Delete'),
-                                          onPressed: () async {
-                                            Navigator.of(context).pop(); // Close the dialog first
-                                            await item.reference.delete();
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Item deleted')),
-                                            );
-                                          },
-                                        ),
-                                      ],
+                            const SizedBox(width: 10),
+                            Column(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => InventoryEditFormPage(item: item),
+                                      ),
                                     );
                                   },
-                                );
-                              },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFEB3B),
+                                    foregroundColor: Colors.black,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      side: const BorderSide(color: Colors.black),
+                                    ),
+                                  ),
+                                  child: const Text('Edit'),
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () => _controller.showDeleteConfirmationDialog(context, item),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFC107),
+                                    foregroundColor: Colors.black,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      side: const BorderSide(color: Colors.black),
+                                    ),
+                                  ),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
                             ),
                           ],
                         ),

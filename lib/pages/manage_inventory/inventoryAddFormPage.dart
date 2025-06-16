@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/widgets/ownerHeader.dart';
 import 'package:mastergig_app/widgets/ownerFooter.dart';
+import 'package:mastergig_app/pages/manage_inventory/inventoryPage.dart';
+import 'package:mastergig_app/provider/InventoryController.dart';
 
 class InventoryAddFormPage extends StatefulWidget {
   const InventoryAddFormPage({super.key});
@@ -12,6 +13,8 @@ class InventoryAddFormPage extends StatefulWidget {
 }
 
 class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
+  final InventoryController _controller = InventoryController();
+
   final TextEditingController workshopNameController = TextEditingController();
   final TextEditingController inventoryNameController = TextEditingController();
   final TextEditingController workshopAddressController = TextEditingController();
@@ -49,11 +52,9 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
               ),
             ),
             const SizedBox(height: 20),
-
             _buildTextField(workshopNameController, 'Workshop Name'),
             _buildTextField(inventoryNameController, 'Inventory Name'),
             _buildTextField(workshopAddressController, 'Workshop Address'),
-
             Row(
               children: [
                 Expanded(
@@ -73,44 +74,37 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
                 ),
               ],
             ),
-
             _buildTextField(additionalNotesController, 'Additional Notes'),
-
             DropdownButtonFormField<String>(
               value: selectedCategory.isEmpty ? null : selectedCategory,
-              items: categories
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
+              items: categories.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: (value) => setState(() => selectedCategory = value ?? ''),
               decoration: const InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 30),
 
-            // Updated Styled Button
+            // Add Inventory Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  await FirebaseFirestore.instance.collection('inventory').add({
-                    'workshopName': workshopNameController.text,
-                    'inventoryName': inventoryNameController.text,
-                    'workshopAddress': workshopAddressController.text,
-                    'quantity': int.tryParse(quantityController.text) ?? 0,
-                    'unitPrice': double.tryParse(unitPriceController.text) ?? 0.0,
-                    'additionalNotes': additionalNotesController.text,
-                    'category': selectedCategory,
-                    'createdAt': FieldValue.serverTimestamp(),
-                  });
-
-                  Get.snackbar('Success', 'Inventory added!');
+                  await _controller.handleAddInventory(
+                    context: context,
+                    workshopName: workshopNameController.text,
+                    inventoryName: inventoryNameController.text,
+                    workshopAddress: workshopAddressController.text,
+                    quantityText: quantityController.text,
+                    unitPriceText: unitPriceController.text,
+                    additionalNotes: additionalNotesController.text,
+                    category: selectedCategory,
+                  );
                   _clearFields();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(238, 239, 211, 11), // Yellow
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -125,6 +119,33 @@ class _InventoryAddFormPageState extends State<InventoryAddFormPage> {
               ),
             ),
 
+            const SizedBox(height: 15),
+
+            // List of Inventory Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const InventoryPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(238, 239, 211, 11),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+                child: const Text(
+                  'List of Inventory',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
             const SizedBox(height: 30),
           ],
         ),

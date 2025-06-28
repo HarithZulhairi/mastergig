@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mastergig_app/domain/Payroll/Payment.dart';
 
 class PayrollController {
   final CollectionReference _paymentCollection =
       FirebaseFirestore.instance.collection('payments'); // Changed from payrolls
-
   Future<void> addPayroll(Payment payment) async {
     try {
       await _paymentCollection.add(payment.toMap()); // Changed _payrollCollection
